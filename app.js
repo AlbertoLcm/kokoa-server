@@ -9,11 +9,11 @@ app.set('port', process.env.PORT || 8081);
 
 // Middlewares..
     const dbOptions = {
-        host: 'localhost',
+        host: 'us-cdbr-east-06.cleardb.net',
         port: '3306',
-        database: 'kokoa',
-        user: 'root',
-        password: ''
+        database: 'heroku_75d7d8951a75510',
+        user: 'b45a2eec4d6249',
+        password: 'f1419041'
     };
     app.use(myconn(mysql, dbOptions, 'single'));
 
