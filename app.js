@@ -3,9 +3,10 @@ const mysql = require('mysql');
 const myconn = require('express-myconnection');
 const routes = require('./routes.js');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
-app.set('port', process.env.PORT || 8081);
+const port = process.env.PORT;
 
 // Middlewares..
     const dbOptions = {
@@ -26,11 +27,8 @@ app.set('port', process.env.PORT || 8081);
 app.use(express.static('build'));
 
 // Routes..
-    app.get('', (req, res) => {
-        res.send('Bienvenido a MyAPI by LCM');
-    });
     app.use('/api', routes)
 
-    app.listen(app.get('port'), () => {
-        ;console.log(`Servidor corriendo en http://localhost:8081`)
+    app.listen(port, () => {
+        console.log(`Servidor corriendo en http://localhost:${port}`)
     });

@@ -1,3 +1,4 @@
+const { response } = require('express');
 const express = require('express');
 const routes = express.Router();
 
@@ -56,6 +57,24 @@ routes.put('/:id', (req, res) => {
                 status: '200 OK',
                 descripcion: 'Usuario actualizado'
             });
+        });
+    })
+});
+
+routes.post('/login', (req, res) => {
+    req.getConnection((err, conn) => {
+        if(err) return res.send(err)
+        
+        conn.query('select * from usuarios where email = ? and password = ?', [req.body.email, req.body.password], (err, result) => {
+            if(err) return res.send(err)
+
+            if(result[0]==null){
+                console.log('no econtrado')
+                res.json(result);
+            }else{
+                console.log('encontrado')
+                res.json(result);
+            }
         });
     })
 });
