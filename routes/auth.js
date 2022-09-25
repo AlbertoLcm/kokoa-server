@@ -8,7 +8,7 @@ const isAuthenticated = require('../middleware/autenticacion.js');
 // ======= Ruta para hacer login a cualquier usuario =======
 routes.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.headers;
+        const { email, password } = req.body;
         // Verificamos que ingresen datos
         if (!email || !password) {
             return res.status(400).json({ message: 'Debes ingresar todos los datos' })
