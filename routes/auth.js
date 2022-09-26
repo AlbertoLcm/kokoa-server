@@ -15,7 +15,7 @@ routes.post('/login', async (req, res) => {
             return;
         }
         // Verificamos si el usuario existe
-        conexion.query(`SELECT * FROM auth WHERE email or telefono = ?`, [req.body.email], async (err, usuario) => {
+        conexion.query(`SELECT * FROM auth WHERE email = ? or telefono = ?`, [req.body.email, req.body.email], async (err, usuario) => {
             if(usuario[0] !== undefined){
                 // Comprobando contraseñas
                 const buscarPass = await bcrypt.compare(password, usuario[0].password);
