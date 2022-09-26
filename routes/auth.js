@@ -28,7 +28,7 @@ routes.post('/login', async (req, res) => {
                         const token = await jwt.sign({ id: user[0].id }, process.env.SECRET_KEY, {
                             expiresIn: process.env.JWT_EXPIRE,
                         }); 
-                        return res.cookie('token', token).json({success: true, message:'Ingresado correctamente', token: token})
+                        return res.cookie('token', token).json({success: true, message:'Ingresado correctamente', user: {token: token, nombre: user[0].nombre}})
                     })
                 }
             } else{
@@ -70,6 +70,18 @@ routes.post('/user', isAuthenticated, async (req, res) => {
                res.status(400).json({message: 'no hay usuario'})
             }else{
                 res.status(200).json({message: 'Encontrado', data: usuario[0]})
+            }
+        });
+});
+
+routes.post('/', isAuthenticated, async(req, res) => {
+    const token = req.headers["authorization"];
+    const verify = await jwt.verify(token, process.env.SECRET_KEY);
+    conexion.query('SELECT * FROM usuarios WHERE id = ?', [verify.id], (err, usuario) => {
+            if(usuario[0] == undefined){
+               res.status(400).json({message: 'no hay usuario'})
+            }else{
+                return res.status(200).json({message: 'Encontrado', user: {token: token, nombre: usuario[0].nombre}})
             }
         });
 });
