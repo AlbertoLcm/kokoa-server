@@ -13,15 +13,6 @@ class Server {
 
     middlewares(){
         this.app.use(cors());
-        // Configurar cabeceras y cors
-        this.app.use((req, res, next) => {
-            res.header('Access-Control-Allow-Origin', '*');
-            res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
-            res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-            res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
-            next();
-        });
-
         //Configuring cookie-parser
         this.app.use(cookieParser()); 
         // Lectura y parseo del body 

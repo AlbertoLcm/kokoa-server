@@ -2,8 +2,9 @@ const jwt = require('jsonwebtoken');
 const conexion = require('../database/db');
 const isAuthenticated = async (req,res,next)=>{
     try {
-        // const token = req.headers["authorization"];
-        const { token } = req.cookies;
+        const token = req.headers["authorization"];
+        // const { token } = req.cookies;
+        console.log(token)
         if(!token){
             return res.status(400).json({ message: 'No hay un token' });
         }
