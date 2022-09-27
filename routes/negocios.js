@@ -42,11 +42,11 @@ const jwt = require('jsonwebtoken');
                                         }], (err, result) => {
                                             if(err) return res.json({ message: 'algo salio mal en la query', error:err.sqlMessage });
                                             
-                                            conexion.query('SELECT * FROM negocios WHERE auth = ?', [auth[0].id], async (err, usuario) => {
-                                                const token = await jwt.sign({ id: usuario[0].id }, process.env.SECRET_KEY, {
+                                            conexion.query('SELECT * FROM negocios WHERE auth = ?', [auth[0].id], async (err, user) => {
+                                                const token = await jwt.sign({ id: user[0].id }, process.env.SECRET_KEY, {
                                                     expiresIn: process.env.JWT_EXPIRE,
                                                 });
-                                                return res.cookie('token', token ).json({ success: true, message: 'Negocio registrado', token: token, nombre:usuario[0].nombre })
+                                                return res.cookie('token', token ).json({ success: true, message: 'Negocio registrado', user: {token: token, nombre: user[0].nombre} })
                                             })
                                         })
                                 });
