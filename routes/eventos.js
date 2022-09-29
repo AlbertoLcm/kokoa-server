@@ -14,12 +14,20 @@ routes.post("/add", async (req, res) => {
         .status(400)
         .json({ message: "Debes ingresar todos los datos" });
     }
+    conexion.query('SELECT * FROM eventos where lat = ? and lng = ?', [req.body.lat, req.body.lng], (err, eventos)=>{
+        if(err) return res.status(400).json({message: 'algo salio mal con la query', error: err});
 
-    conexion.query("INSERT INTO eventos SET ?", [req.body], (err, result) => {
-      if (err) return res.json({ msg: err });
+        if(eventos[0] == null){
+            conexion.query("INSERT INTO eventos SET ?", [req.body], (err, result) => {
+              if (err) return res.json({ msg: err });
+        
+              return res.status(200).json({ message: "Evento registrado" });
+            });
+        }else{
+            return res.status(400).json({message: 'Ya hay un evento en ese lugar :c'})
+        }
 
-      return res.status(200).json({ message: "Evento registrado" });
-    });
+    })
   } catch (error) {
     return res.json({ error: error });
   }
