@@ -25,6 +25,7 @@ class Server {
         this.app.use('/api/artistas', require('../routes/artistas.js'));
         this.app.use('/api/negocios', require('../routes/negocios.js'));
         this.app.use('/api/patrocinadores', require('../routes/patrocinadores.js'));
+        this.app.use('/api/eventos', require('../routes/eventos.js'));
     }
 
     listen(){
