@@ -6,6 +6,14 @@ const jwt = require("jsonwebtoken");
 
 // ======= Ruta para registrar un evento =======
 routes.post("/add", async (req, res) => {
+  let fechaInicio = req.body.datosEvento.fechaInicio;
+  let horaIncio= req.body.datosEvento.horaIncio;
+  let fechaTermino = req.body.datosEvento.fechaTermino;
+  let horaTermino= req.body.datosEvento.horaTermino;
+
+  const fecha_inicio = `${fechaInicio} ${horaIncio}:00`;
+  const fecha_termino = `${fechaTermino} ${horaTermino}:00`;
+
   try {
     const { lat, lng } = req.body;
     // Verificamos que ingresen todos los datos
@@ -18,7 +26,13 @@ routes.post("/add", async (req, res) => {
         if(err) return res.status(400).json({message: 'algo salio mal con la query', error: err});
 
         if(eventos[0] == null){
-            conexion.query("INSERT INTO eventos SET ?", [req.body], (err, result) => {
+            conexion.query("INSERT INTO eventos SET ?", [{
+              "nombre": req.body.datosEvento.nombre,
+              "fecha_inicio": fecha_inicio,
+              "fecha_termino": fecha_termino,
+              "lat": req.body.lat,
+              "lng": req.body.lng
+            }], (err, result) => {
               if (err) return res.json({ msg: err });
         
               return res.status(200).json({ message: "Evento registrado" });
