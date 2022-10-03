@@ -15,7 +15,7 @@ class Server {
         this.app.use(
             cors({origin: [`http://localhost:${this.port}`, 'https://kokoa-server.herokuapp.com']})
           );
-        app.use(function (req, res, next) {
+        this.app.use(function (req, res, next) {
 
             // Website you wish to allow to connect
             res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8888');
