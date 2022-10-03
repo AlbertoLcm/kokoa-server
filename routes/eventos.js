@@ -59,17 +59,6 @@ routes.get("/", (req, res) => {
   );
 });
 
-routes.delete("/:id", (req, res) => {
-  conexion.query(
-    "DELETE FROM usuarios WHERE id = ?",
-    [req.params.id],
-    (err, result) => {
-      if (err) return res.send(err);
-      res.status(200).json({ meesage: "Usuario borrado" });
-    }
-  );
-});
-
 routes.put("/:id", (req, res) => {
   conexion.query(
     "UPDATE usuarios set ? WHERE id = ?",
