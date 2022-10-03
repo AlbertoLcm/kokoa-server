@@ -43,7 +43,7 @@ class Server {
 
     routes(){
         this.app.use('/', (res, req) => {
-            res.status(200).send('Api Kokoa by Lcm');
+            res.send('Api Kokoa by Lcm');
         });
         this.app.use('/api/auth', require('../routes/auth.js'));
         this.app.use('/api/usuarios', require('../routes/usuarios.js'));
