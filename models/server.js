@@ -35,7 +35,6 @@ class Server {
         //     // Pass to next layer of middleware
         //     next();
         // });
-        
         //Configuring cookie-parser
         this.app.use(cookieParser()); 
         // Lectura y parseo del body 
@@ -43,6 +42,9 @@ class Server {
     }
 
     routes(){
+        this.app.use('/', (res, req) => {
+            res.status(200).html(`<div> Api Kokoa by Lcm </div>`);
+        });
         this.app.use('/api/auth', require('../routes/auth.js'));
         this.app.use('/api/usuarios', require('../routes/usuarios.js'));
         this.app.use('/api/artistas', require('../routes/artistas.js'));
