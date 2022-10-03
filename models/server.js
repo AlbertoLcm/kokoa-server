@@ -14,7 +14,7 @@ class Server {
     middlewares(){
         this.app.use(
             cors({
-                origin:'https://kokoafast.herokuapp.com'
+                origin:'http://localhost:3000'
             })
           );
         // this.app.use(function (req, res, next) {
