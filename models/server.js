@@ -15,7 +15,7 @@ class Server {
     }
 
     middlewares(){
-        this.app.use(myConnection(mysql, dbOptions, 'pool'));
+        this.app.use(myConnection(mysql, dbOptions, 'request'));
         this.app.use(cors());
         //Configuring cookie-parser
         this.app.use(cookieParser()); 
