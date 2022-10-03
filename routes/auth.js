@@ -102,7 +102,8 @@ routes.get("/", (req, res) => {
 routes.post("/", isAuthenticated, async (req, res) => {
   const token = req.headers["authorization"];
   const verify = await jwt.verify(token, process.env.SECRET_KEY);
-  req.getConnection((err, conn) => {
+  req.getConnection((errBD, conn) => {
+    if(errBD, res.status(400).json({message: "algo salio mal", error: errBD}))
     conn.query(
       "SELECT * FROM usuarios WHERE id = ?",
       [verify.id],
