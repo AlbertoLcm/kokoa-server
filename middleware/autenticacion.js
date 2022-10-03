@@ -11,13 +11,13 @@ const isAuthenticated = async (req = request,res = response,next)=>{
         const verify = await jwt.verify(token, process.env.SECRET_KEY);
         req.getConnection((err, conn) => {
             if(err) return res.status(400).json({message: 'Algo salio mal en la query', error: err});
-            conn.query('SELECT * FROM usuarios WHERE id = ?', [verify.id], (errQ, usuario) => {
+            req.user = conn.query('SELECT * FROM usuarios WHERE id = ?', [verify.id], (errQ, usuario) => {
                 if(errQ) return res.status(400).json({message: 'Algo salio mal en la query', error: err});
                 
                 if(usuario[0] === undefined){
                     next(err);
                 }else{
-                    req.user = usuario[0]
+                    
                     next();
                 }
             });
