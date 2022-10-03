@@ -1,7 +1,10 @@
 const cookieParser = require('cookie-parser');
 const express = require('express');
 const cors = require('cors');
-
+const mysql = require('mysql2');
+const myConnection = require('express-myconnection'); // express-myconnection module
+const dbOptions = require('../database/db.js');
+  
 class Server {
     constructor(){
         this.app = express();
@@ -12,8 +15,8 @@ class Server {
     }
 
     middlewares(){
+        this.app.use(myConnection(mysql, dbOptions, 'pool'));
         this.app.use(cors());
-        
         //Configuring cookie-parser
         this.app.use(cookieParser()); 
         // Lectura y parseo del body 
