@@ -10,8 +10,9 @@ const isAuthenticated = async (req,res,next)=>{
         }
         const verify = await jwt.verify(token, process.env.SECRET_KEY);
         req.user = conexion.query('SELECT * FROM usuarios WHERE id = ?', [verify.id], (err, usuario) => {
-            if(usuario[0] == undefined){
-                next(err);
+            if(usuario[0] === undefined){
+                console.log('No encontrado')
+                // next(err);
             }else{
                 next();
             }
