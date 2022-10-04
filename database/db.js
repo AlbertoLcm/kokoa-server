@@ -1,8 +1,8 @@
 const dbOptions = {
-  host: "us-cdbr-east-06.cleardb.net",
-  database: "heroku_68fadd478806cd8",
-  user: "b529c9b0af85d4",
-  password: "d7b83dc7",
+  host: "au77784bkjx6ipju.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
+  database: "bi2exh0bnxn3lc8h",
+  user: "v0kcc88z0eppecgm",
+  password: "rg2tgd6b6nf3oatl",
   port: "3306",
   waitForConnections: true,
   connectionLimit: 10,

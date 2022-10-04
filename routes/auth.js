@@ -28,7 +28,7 @@ routes.post("/login", async (req, res) => {
               error: err,
             });
 
-          if (usuario) {
+          if (usuario.length) {
             // Comprobando contraseñas
             const buscarPass = await bcrypt.compare(
               password,
@@ -77,18 +77,18 @@ routes.post("/login", async (req, res) => {
 // // ======= Fin ruta para hacer login a un usuario =======
 
 // // ======= Ruta para cerrar session =========
-// routes.put("/logout", isAuthenticated, (req, res) => {
-//   const token = req.headers["authorization"];
+routes.put("/logout", isAuthenticated, (req, res) => {
+  const token = req.headers["authorization"];
 
-//   jwt.sign(token, "", { expiresIn: 1 }, (logout, err) => {
-//     if (logout) {
-//       res.clearCookie("token");
-//       res.status(200).send({ msg: "Has sido desconectado" });
-//     } else {
-//       res.status(400).send({ msg: "Error" });
-//     }
-//   });
-// });
+  jwt.sign(token, "", { expiresIn: 1 }, (logout, err) => {
+    if (logout) {
+      res.clearCookie("token");
+      res.status(200).send({ msg: "Has sido desconectado" });
+    } else {
+      res.status(400).send({ msg: "Error" });
+    }
+  });
+});
 // // ======= Fin ruta para cerrar session =========
 
 routes.get("/", (req, res) => {
@@ -110,7 +110,7 @@ routes.post("/", isAuthenticated, async (req, res) => {
       "SELECT * FROM usuarios WHERE id = ?",
       [verify.id],
       (err, user) => {
-        if (!usuario.length) {
+        if (!user.length) {
           res.status(400).json({ message: "no hay usuario" });
         } else {
           return res

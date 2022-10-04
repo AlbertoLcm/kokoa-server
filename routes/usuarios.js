@@ -39,7 +39,7 @@ const jwt = require('jsonwebtoken');
 
                                     // Buscamos la data del usuario ingresado
                                     conn.query('SELECT * FROM auth WHERE email = ?', [req.body.email], (err, auth) => {
-                                        if(err) return res.json({ meesage: 'Algo salio mal con la query', err: err.sqlMessage })
+                                        if(err) return res.status(400).json({ meesage: 'Algo salio mal con la query', err: err.sqlMessage })
                                             
                                         // Ingresamos la data en la tabla usuarios 
                                         conn.query('INSERT INTO usuarios SET ?', [{
@@ -47,7 +47,7 @@ const jwt = require('jsonwebtoken');
                                                 "apellidos": req.body.apellidos,
                                                 "auth": auth[0].id
                                             }], (err) => {
-                                                if(err) return res.json({ message: 'algo salio mal en la query', error:err.sqlMessage });
+                                                if(err) return res(400).json({ message: 'algo salio mal en la query', error:err.sqlMessage });
                                                 
                                                 conn.query('SELECT * FROM usuarios WHERE auth = ?', [auth[0].id], async (err, user) => {
                                                     const token = await jwt.sign({ id: user[0].id }, process.env.SECRET_KEY, {
