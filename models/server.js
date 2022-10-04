@@ -2,7 +2,7 @@ const cookieParser = require('cookie-parser');
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
-const myConnection = require('express-myconnection'); // express-myconnection module
+const myConnection = require('express-myconnection');
 const dbOptions = require('../database/db.js');
   
 class Server {
@@ -14,7 +14,7 @@ class Server {
         this.routes();
     }
 
-    middlewares(){
+    async middlewares(){
         this.app.use(myConnection(mysql, dbOptions, 'request'));
         this.app.use(cors());
         //Configuring cookie-parser
@@ -25,7 +25,7 @@ class Server {
 
     routes(){
         this.app.use('/api/auth', require('../routes/auth.js'));
-        // this.app.use('/api/usuarios', require('../routes/usuarios.js'));
+        this.app.use('/api/usuarios', require('../routes/usuarios.js'));
         // this.app.use('/api/artistas', require('../routes/artistas.js'));
         // this.app.use('/api/negocios', require('../routes/negocios.js'));
         // this.app.use('/api/patrocinadores', require('../routes/patrocinadores.js'));

@@ -9,7 +9,7 @@ routes.post("/login", async (req, res) => {
   try {
     req.getConnection((err, conn) => {
       if (err)
-        return res.json({ message: "algo salio mal en la query", error: err });
+        return res.status(400).json({ message: "algo salio mal en la query", error: err });
 
       const { email, password } = req.body;
       // Verificamos que ingresen datos
@@ -28,7 +28,7 @@ routes.post("/login", async (req, res) => {
               error: err,
             });
 
-          if (usuario[0] !== undefined) {
+          if (usuario) {
             // Comprobando contraseñas
             const buscarPass = await bcrypt.compare(
               password,
@@ -74,21 +74,21 @@ routes.post("/login", async (req, res) => {
     return res.json({ error: error });
   }
 });
-// ======= Fin ruta para hacer login a un usuario =======
+// // ======= Fin ruta para hacer login a un usuario =======
 
-// ======= Ruta para cerrar session =========
-routes.put("/logout", isAuthenticated, (req, res) => {
-  const { token } = req.cookies;
-  jwt.sign(token, "", { expiresIn: 1 }, (logout, err) => {
-    if (logout) {
-      res.clearCookie("token");
-      res.status(200).send({ msg: "Has sido desconectado" });
-    } else {
-      res.status(400).send({ msg: "Error" });
-    }
-  });
-});
-// ======= Fin ruta para cerrar session =========
+// // ======= Ruta para cerrar session =========
+// routes.put("/logout", isAuthenticated, (req, res) => {
+//   const { token } = req.cookies;
+//   jwt.sign(token, "", { expiresIn: 1 }, (logout, err) => {
+//     if (logout) {
+//       res.clearCookie("token");
+//       res.status(200).send({ msg: "Has sido desconectado" });
+//     } else {
+//       res.status(400).send({ msg: "Error" });
+//     }
+//   });
+// });
+// // ======= Fin ruta para cerrar session =========
 routes.get("/", (req, res) => {
   req.getConnection((err, conn) => {
     conn.query("SELECT * FROM auth", (err, result) => {
@@ -99,28 +99,28 @@ routes.get("/", (req, res) => {
   });
 });
 
-routes.post("/", isAuthenticated, async (req, res) => {
-  const token = req.headers["authorization"];
-  const verify = await jwt.verify(token, process.env.SECRET_KEY);
-  req.getConnection((errBD, conn) => {
-    if(errBD, res.status(400).json({message: "algo salio mal", error: errBD}))
-    conn.query(
-      "SELECT * FROM usuarios WHERE id = ?",
-      [verify.id],
-      (err, user) => {
-        if (user[0] == undefined) {
-          res.status(400).json({ message: "no hay usuario" });
-        } else {
-          return res
-            .status(200)
-            .json({
-              message: "Encontrado",
-              user: { token: token, nombre: user[0].nombre },
-            });
-        }
-      }
-    );
-  });
-});
+// routes.post("/", isAuthenticated, async (req, res) => {
+//   const token = req.headers["authorization"];
+//   const verify = await jwt.verify(token, process.env.SECRET_KEY);
+//   req.getConnection((errBD, conn) => {
+//     if(errBD) return res.status(400).json({message: "algo salio mal", error: errBD})
+//     conn.query(
+//       "SELECT * FROM usuarios WHERE id = ?",
+//       [verify.id],
+//       (err, user) => {
+//         if (!user) {
+//           res.status(400).json({ message: "no hay usuario" });
+//         } else {
+//           return res
+//             .status(200)
+//             .json({
+//               message: "Encontrado",
+//               user: { token: token, nombre: user[0].nombre },
+//             });
+//         }
+//       }
+//     );
+//   });
+// });
 
 module.exports = routes;

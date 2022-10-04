@@ -15,32 +15,38 @@ const jwt = require('jsonwebtoken');
             const salt = await bcrypt.genSalt(10);
             const hashPassword = await bcrypt.hash(req.body.password, salt);
             req.body.password = hashPassword;
-            // Verificamos si existe el usuarios en la BD
+            // Inciamos conexion con la BD
             req.getConnection((errBD, conn) => {
-                if(errBD) return req.status(400).json({message: 'Algo salio mal con la Query', error: errBD});
+                if(errBD) return res.json({message: 'Algo salio mal con la Query', error: errBD});
+                
+                // Verificamos si existe el usuarios en la BD
+                conn.query('SELECT * FROM auth WHERE email = ?', [req.body.email], (err, emailRes) => {
+                    if(err) return res.status(400).json({ message: 'Algo salio mal en la query', error:err.sqlMessage });
 
-                conn.query('SELECT * FROM auth WHERE email = ?', [req.body.email], (err, results) => {
-                    if(err) return res.json({ message: 'Algo salio mal en la query', error:err.sqlMessage });
+                    // Verificamos si el telefono existe en la BD
+                    if(!emailRes.length){
+                        conn.query('SELECT * FROM auth WHERE telefono = ?', [req.body.telefono], (err, telefonoRes) => {
+                            if(err) return res.status(400).json({ message: 'Algo salio mal en la query', error:err.sqlMessage });
     
-                    if(results[0] == null){
-                        conn.query('SELECT * FROM auth WHERE telefono = ?', [req.body.telefono], (err, results) => {
-                            if(err) return res.json({ message: 'Algo salio mal en la query', error:err.sqlMessage });
-    
-                            if(results[0] == null){
+                            // Insertamos todo en la tabla auth
+                            if(!telefonoRes.length){
                                 conn.query('INSERT INTO auth SET ?', [{
                                     "email": req.body.email, 
                                     "telefono": req.body.telefono,
                                     "password": req.body.password
-                                }],(err, result) =>{
+                                }],(err) =>{
                                     if(err) return res.json({msg: err});
-    
+
+                                    // Buscamos la data del usuario ingresado
                                     conn.query('SELECT * FROM auth WHERE email = ?', [req.body.email], (err, auth) => {
                                         if(err) return res.json({ meesage: 'Algo salio mal con la query', err: err.sqlMessage })
-                                            conn.query('INSERT INTO usuarios SET ?', [{
+                                            
+                                        // Ingresamos la data en la tabla usuarios 
+                                        conn.query('INSERT INTO usuarios SET ?', [{
                                                 "nombre": req.body.nombre,
                                                 "apellidos": req.body.apellidos,
                                                 "auth": auth[0].id
-                                            }], (err, result) => {
+                                            }], (err) => {
                                                 if(err) return res.json({ message: 'algo salio mal en la query', error:err.sqlMessage });
                                                 
                                                 conn.query('SELECT * FROM usuarios WHERE auth = ?', [auth[0].id], async (err, user) => {
@@ -70,11 +76,11 @@ const jwt = require('jsonwebtoken');
 
 routes.get('/', (req, res) => {
     req.getConnection((errBD, conn) => {
-        if(errBD) return req.status(400).json({message: 'Algo salio mal con la Query', error: errBD})
-        conn.query('SELECT * FROM usuarios, auth WHERE usuarios.auth = auth.id;', (err, result) => {
+        if(errBD) return res.status(400).json({message: 'Algo salio mal con la Query', error: errBD})
+        conn.query('SELECT * FROM usuarios, auth WHERE usuarios.auth = auth.id;', (err, usuarios) => {
             if(err) return res.send(err)
     
-            res.json(result);
+            res.json(usuarios);
         });
     })
 });
