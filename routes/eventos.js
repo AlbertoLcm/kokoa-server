@@ -51,7 +51,7 @@ routes.post('/add', (req, res) => {
 
                 // enviar correo a todos los usuarios
                 conn.query(
-                  'SELECT * FROM usuarios JOIN auth WHERE usuarios.id = auth.id',
+                  'SELECT * FROM usuarios JOIN auth WHERE usuarios.auth = auth.id',
                   (err, usuarios) => {
                     if (err) return res.json({ msg: err })
 
@@ -65,13 +65,12 @@ routes.post('/add', (req, res) => {
                       <h2> Hay un evento cercano y no estas ahí </h2>
                       <h3> ${req.body.datosEvento.nombre} </h3>
                       <p> Ubicado en ${req.body.ubicacion} </p>
-                      <a href="http://192.168.0.16:3000/login"> Ver evento </a>
+                      <a href="https://kokoafast.herokuapp.com"> Ver evento </a>
                       `, // html body
                       })
                     })
                   },
                 )
-
                 return res.status(200).json({ message: 'Evento registrado' })
               },
             )

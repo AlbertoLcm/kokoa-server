@@ -33,8 +33,6 @@ routes.post("/login", async (req, res) => {
               if (err)
                 return res.json({ message: "algo salio mal en la query", error: err });
 
-                console.log(user[0].rol)
-
                 // // Obtenemos toda la informacion del usuario
                 conn.query(`SELECT * FROM ${user[0].rol} JOIN auth ON ${user[0].rol}.auth = auth.id WHERE auth.id = ?`, [user[0].id], async(err, userDB) => {
                   if (err)
