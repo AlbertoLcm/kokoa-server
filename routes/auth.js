@@ -59,7 +59,7 @@ routes.post("/login", async (req, res) => {
                     .json({
                       success: true,
                       message: "Ingresado correctamente",
-                      user: { token: token, nombre: user[0].nombre },
+                      user: { token: token, data: user },
                     });
                 }
               );
@@ -117,7 +117,7 @@ routes.post("/", isAuthenticated, async (req, res) => {
             .status(200)
             .json({
               message: "Encontrado",
-              user: { token: token, nombre: user[0].nombre },
+              user: { token: token, data: user }
             });
         }
       }

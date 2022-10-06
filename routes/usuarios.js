@@ -53,7 +53,7 @@ const jwt = require('jsonwebtoken');
                                                     const token = await jwt.sign({ id: user[0].id }, process.env.SECRET_KEY, {
                                                         expiresIn: process.env.JWT_EXPIRE,
                                                     });
-                                                    return res.cookie('token', token ).json({ success: true, message: 'Usuario registrado', user: {token: token, nombre: user[0].nombre} })
+                                                    return res.cookie('token', token ).json({ success: true, message: 'Usuario registrado', user: {token: token, data: user} })
                                                 })
                                             })
                                     });

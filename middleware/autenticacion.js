@@ -4,7 +4,6 @@ const isAuthenticated = async (req = request,res = response,next)=>{
     try {
         const token = req.headers["authorization"];
         // const { token } = req.cookies;
-        console.log(token)
         if(!token){
             return res.status(400).json({ message: 'No hay un token' });
         }
