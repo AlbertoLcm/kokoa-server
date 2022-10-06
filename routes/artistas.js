@@ -21,29 +21,26 @@ routes.post("/signup", async (req, res) => {
       if (errBD)
         return req.status(400).json({ message: 'Algo salio mal con la Query', error: errBD });
 
-
       conn.query('SELECT * FROM auth WHERE email = ?', [req.body.email], (err, results) => {
         if (err)
           return res.json({ message: 'Algo salio mal en la query', error: err.sqlMessage });
-
 
         if (!results.length) {
           conn.query('SELECT * FROM auth WHERE telefono = ?', [req.body.telefono], (err, results) => {
             if (err)
               return res.json({ message: 'Algo salio mal en la query', error: err.sqlMessage });
 
-
             if (!results.length) {
               conn.query('INSERT INTO auth SET ?', [
                 {
-                  "email": req.body.email,
-                  "telefono": req.body.telefono,
-                  "password": req.body.password
+                  email: req.body.email,
+                  telefono: req.body.telefono,
+                  password: req.body.password,
+                  rol: req.body.rol
                 }
               ], (err, result) => {
                 if (err)
                   return res.json({ msg: err });
-
 
                 conn.query('SELECT * FROM auth WHERE email = ?', [req.body.email], (err, auth) => {
                   if (err)
@@ -51,15 +48,14 @@ routes.post("/signup", async (req, res) => {
 
                   conn.query('INSERT INTO artistas SET ?', [
                     {
-                      "nombre": req.body.nombre,
-                      "domicilio": req.body.direccion,
-                      "descripcion": req.body.descripcion,
-                      "auth": auth[0].id
+                      nombre: req.body.nombre,
+                      domicilio: req.body.direccion,
+                      descripcion: req.body.descripcion,
+                      auth: auth[0].id
                     }
                   ], (err, result) => {
                     if (err)
                       return res.json({ message: 'algo salio mal en la query', error: err.sqlMessage });
-
 
                     conn.query('SELECT * FROM artistas JOIN auth ON artistas.auth = auth.id WHERE auth.id = ?', [auth[0].id], async (err, user) => {
                       const token = await jwt.sign({
@@ -89,7 +85,6 @@ routes.post("/signup", async (req, res) => {
   } catch (error) {
     return res.json({ error: error });
   }
-
 })
 // ======= Fin de la ruta de registrar ======
 
@@ -98,12 +93,9 @@ routes.get('/', (req, res) => {
     if (errBD)
       return req.status(400).json({ message: 'Algo salio mal con la Query', error: errBD });
 
-
     conn.query('SELECT * FROM artistas, auth WHERE artistas.auth = auth.id', (err, result) => {
       if (err)
         return res.send(err)
-
-
 
       res.json(result);
     });
@@ -114,7 +106,6 @@ routes.delete('/:id', (req, res) => {
   req.getConnection((errBD, conn) => {
     if (errBD)
       return req.status(400).json({ message: 'Algo salio mal con la Query', error: errBD });
-
 
     conn.query('DELETE FROM artistas WHERE id = ?', [req.params.id], (err, result) => {
       if (err)
@@ -130,14 +121,11 @@ routes.put('/:id', (req, res) => {
     if (errBD)
       return req.status(400).json({ message: 'Algo salio mal con la Query', error: errBD });
 
-
     conn.query('UPDATE artistas set ? WHERE id = ?', [
       req.body, req.params.id
     ], (err, result) => {
       if (err)
         return res.send(err)
-
-
 
       res.json({ status: '200 OK', descripcion: 'Artista actualizado' });
     });
