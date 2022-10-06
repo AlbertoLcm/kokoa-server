@@ -23,11 +23,11 @@ const jwt = require('jsonwebtoken');
                 conn.query('SELECT * FROM auth WHERE email = ?', [req.body.email], (err, results) => {
                     if(err) return res.json({ message: 'Algo salio mal en la query', error:err.sqlMessage });
     
-                    if(!results){
+                    if(!results.length){
                         conn.query('SELECT * FROM auth WHERE telefono = ?', [req.body.telefono], (err, results) => {
                             if(err) return res.json({ message: 'Algo salio mal en la query', error:err.sqlMessage });
     
-                            if(!results){
+                            if(!results.length){
                                 conn.query('INSERT INTO auth SET ?', [{
                                     "email": req.body.email, 
                                     "telefono": req.body.telefono,
