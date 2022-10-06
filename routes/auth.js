@@ -33,8 +33,10 @@ routes.post("/login", async (req, res) => {
               if (err)
                 return res.json({ message: "algo salio mal en la query", error: err });
 
-                // Obtenemos toda la informacion del usuario
-                conn.query(`SELECT * FROM ${user.rol} JOIN auth ON ${user.rol}.id = auth.id WHERE auth.id = ?`, [user[0].id], async(err, userDB) => {
+                console.log(user[0].rol)
+
+                // // Obtenemos toda la informacion del usuario
+                conn.query(`SELECT * FROM ${user[0].rol} JOIN auth ON ${user[0].rol}.auth = auth.id WHERE auth.id = ?`, [user[0].id], async(err, userDB) => {
                   if (err)
                     return res.json({ message: "algo salio mal en la query", error: err });
 
@@ -97,20 +99,29 @@ routes.post("/", isAuthenticated, async (req, res) => {
     if (errBD)
       return res.status(400).json({ message: "algo salio mal", error: errBD })
 
-    conn.query("SELECT * FROM usuarios JOIN auth ON usuarios.auth = auth.id WHERE usuarios.id = ?", [verify.id], (err, user) => {
+    conn.query("SELECT * FROM auth WHERE id = ?", [verify.id], (err, user) => {
+      if (err)
+        return res.status(400).json({ message: "algo salio mal", error: err });
+
       if (!user.length) {
         res.status(400).json({ message: "no hay usuario" });
       } else {
-        return res.status(200).json({
-          message: "Encontrado",
-          user: {
-            token: token,
-            data: user
-          }
+        conn.query(`SELECT * FROM ${user[0].rol} JOIN auth ON ${user[0].rol}.auth = auth.id WHERE auth.id = ?`, [user[0].id], (err, usuarioDB) => {
+          if (err)
+            return res.status(400).json({ message: "algo salio mal", error: err });
+
+          return res.status(200).json({
+            message: "Encontrado",
+            user: {
+              token: token,
+              data: usuarioDB
+            }
+          });
         });
       }
     });
   });
 });
+
 
 module.exports = routes;
