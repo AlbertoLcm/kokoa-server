@@ -38,7 +38,7 @@ routes.post("/login", async (req, res) => {
               return res.status(400).json({ message: "Contraseña incorrecta" });
             } else {
               conn.query(
-                "SELECT * FROM usuarios JOIN auth ON usuarios.auth = auth.id WHERE auth.id = ?",
+                "SELECT * FROM auth WHERE id = ?",
                 [usuario[0].id],
                 async (err, user) => {
                   if (err)
@@ -93,7 +93,7 @@ routes.put("/logout", isAuthenticated, (req, res) => {
 
 routes.get("/", (req, res) => {
   req.getConnection((err, conn) => {
-    conn.query("SELECT * FROM auth", (err, result) => {
+    conn.query("SELECT * FROM usuarios JOIN auth WHERE usuarios.auth = auth.id", (err, result) => {
       if (err) return res.send(err);
 
       res.json(result);
