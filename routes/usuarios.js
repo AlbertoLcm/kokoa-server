@@ -49,7 +49,7 @@ const jwt = require('jsonwebtoken');
                                             }], (err) => {
                                                 if(err) return res(400).json({ message: 'algo salio mal en la query', error:err.sqlMessage });
                                                 
-                                                conn.query('SELECT * FROM usuarios WHERE auth = ?', [auth[0].id], async (err, user) => {
+                                                conn.query('SELECT * FROM usuarios JOIN auth ON usuarios.auth = auth.id WHERE auth.id = ?', [auth[0].id], async (err, user) => {
                                                     const token = await jwt.sign({ id: user[0].id }, process.env.SECRET_KEY, {
                                                         expiresIn: process.env.JWT_EXPIRE,
                                                     });
