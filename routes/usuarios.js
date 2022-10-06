@@ -91,8 +91,8 @@ routes.post('/signup', async (req, res) => {
         } else {
           res.status(400).json({ message: 'El correo ya existe' })
         }
-      },)
-    })
+      });
+    });
   } catch (error) {
     return res.json({ error: error })
   }

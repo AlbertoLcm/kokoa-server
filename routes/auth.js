@@ -81,7 +81,7 @@ routes.put("/logout", isAuthenticated, (req, res) => {
 
 routes.get("/", (req, res) => {
   req.getConnection((err, conn) => {
-    conn.query("SELECT * FROM usuarios JOIN auth WHERE usuarios.auth = auth.id", (err, result) => {
+    conn.query("SELECT * FROM auth", (err, result) => {
       if (err)
         return res.send(err);
 
