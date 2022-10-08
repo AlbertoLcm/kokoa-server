@@ -13,7 +13,7 @@ routes.post('/add', (req, res) => {
   const fecha_termino = `${fechaTermino} ${horaTermino}:00`
 
   try {
-    const { lat, lng } = req.body
+    const { lat, lng, id } = req.body
     // Verificamos que ingresen todos los datos
     if (!lat || !lng) {
       return res.status(400).json({ message: 'Debes ingresar todos los datos' })
@@ -44,31 +44,31 @@ routes.post('/add', (req, res) => {
                   fecha_termino: fecha_termino,
                   lat: req.body.lat,
                   lng: req.body.lng,
+                  anfitrion: id,
                 },
               ],
               (err, result) => {
                 if (err) return res.json({ msg: err })
 
-                // enviar correo a todos los usuarios
                 conn.query(
                   'SELECT * FROM usuarios JOIN auth WHERE usuarios.auth = auth.id',
                   (err, usuarios) => {
                     if (err) return res.json({ msg: err })
-
-                    usuarios.forEach(async (usuario) => {
-                      await transporter.sendMail({
-                        from: '"Kokoa" <kokoafast@gmail.com>', // sender address
-                        to: usuario.email, // list of receivers
-                        subject: 'Evento cerca de ti!!!', // Subject line
-                        html: `
-                      <h1> Kokoa </h1>
-                      <h2> Hay un evento cercano y no estas ahí </h2>
-                      <h3> ${req.body.datosEvento.nombre} </h3>
-                      <p> Ubicado en ${req.body.ubicacion} </p>
-                      <a href="https://kokoafast.herokuapp.com"> Ver evento </a>
-                      `, // html body
+                      // enviar correo a todos los usuarios
+                      usuarios.forEach(async(usuario) => {
+                        await transporter.sendMail({
+                          from: '"Kokoa" <kokoafast@gmail.com>', // sender address
+                          to: usuario.email, // list of receivers
+                          subject: 'Evento cerca de ti!!!', // Subject line
+                          html: `
+                            <h1> Kokoa </h1>
+                            <h2> Hay un evento cercano y no estas ahí </h2>
+                            <h3> ${req.body.datosEvento.nombre} </h3>
+                            <p> Ubicado en ${req.body.ubicacion} </p>
+                            <a href="http://localhost:3000/"> Ver evento </a>
+                          `, // html body
+                        })
                       })
-                    })
                   },
                 )
                 return res.status(200).json({ message: 'Evento registrado' })
@@ -102,6 +102,44 @@ routes.get('/', (req, res) => {
     })
   })
 })
+
+// ruta para mostrar eventos de negocio
+routes.get('/:id', (req, res) => {
+  req.getConnection((errBD, conn) => {
+    if (errBD)
+      return res
+        .status(400)
+        .json({ message: 'Algo salio mal con la Query', error: errBD })
+
+    conn.query('SELECT * FROM eventos where host_negocio = ? OR host_usuario = ?', [req.params.id, req.params.id], (err, result) => {
+      if (err) return res.send(err)
+
+      res.json(result)
+    })
+  })
+})
+
+// ruta para mostrar eventos de usuario
+
+// Mostrar un evento
+routes.get('/:id', (req, res) => {
+  req.getConnection((errBD, conn) => {
+    if (errBD)
+      return res
+        .status(400)
+        .json({ message: 'Algo salio mal con la Query', error: errBD })
+
+    conn.query(
+      'SELECT * FROM eventos WHERE id = ?',
+      [req.params.id],
+      (err, result) => {
+        if (err) return res.send(err)
+
+        res.status(200).json(result)
+      },
+    )
+  })
+});
 
 routes.put('/:id', (req, res) => {
   req.getConnection((errBD, conn) => {

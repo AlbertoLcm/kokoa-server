@@ -29,13 +29,13 @@ routes.post('/signup', async (req, res) => {
       // Verificamos si existe el usuarios en la BD
       conn.query('SELECT * FROM auth WHERE email = ?', [req.body.email], (err, emailRes) => {
         if (err)
-          return res.status(400).json({ message: 'Algo salio mal en la query', error: err.sqlMessage })
+          return res.status(400).json({ message: 'Algo salio mal en la query', error: err })
 
         // Verificamos si el telefono existe en la BD
         if (!emailRes.length) {
           conn.query('SELECT * FROM auth WHERE telefono = ?', [req.body.telefono], (err, telefonoRes) => {
             if (err)
-              return res.status(400).json({ message: 'Algo salio mal en la query', error: err.sqlMessage })
+              return res.status(400).json({ message: 'Algo salio mal en la query', error: err })
 
             // Insertamos todo en la tabla auth
             if (!telefonoRes.length) {
@@ -48,12 +48,12 @@ routes.post('/signup', async (req, res) => {
                 },
               ], (err) => {
                 if (err)
-                  return res.json({ msg: err })
+                  return res.status(400).json({ message: 'Algo salio mal en la query', msg: err })
 
                 // Buscamos la data del usuario ingresado
                 conn.query('SELECT * FROM auth WHERE email = ?', [req.body.email], (err, auth) => {
                   if (err)
-                    return res.status(400).json({ meesage: 'Algo salio mal con la query', err: err.sqlMessage })
+                    return res.status(400).json({ meesage: 'Algo salio mal con la query', err: err })
 
                   // Ingresamos la data en la tabla usuarios
                   conn.query('INSERT INTO usuarios SET ?', [
@@ -64,9 +64,12 @@ routes.post('/signup', async (req, res) => {
                     },
                   ], (err) => {
                     if (err)
-                      return res(400).json({ message: 'algo salio mal en la query', error: err.sqlMessage })
+                      return res(400).json({ message: 'algo salio mal en la query', error: err })
 
                     conn.query(`SELECT * FROM usuarios JOIN auth ON usuarios.auth = auth.id WHERE auth.id = ?`, [auth[0].id], async (err, user) => {
+                      if (err)
+                        return res.status(400).json({ message: 'Algo salio mal con la query', error: err })
+                      
                       const token = await jwt.sign({
                         id: user[0].id
                       }, process.env.SECRET_KEY, {
@@ -79,11 +82,11 @@ routes.post('/signup', async (req, res) => {
                           token: token,
                           data: user
                         }
-                      })
-                    },)
-                  },)
-                },)
-              },)
+                      });
+                    },);
+                  },);
+                },);
+              },);
             } else {
               res.status(400).json({ message: 'El telefono ya existe' })
             }

@@ -1,6 +1,5 @@
 const express = require('express');
 const routes = express.Router();
-const conexion = require('../database/db.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -68,24 +67,24 @@ routes.post("/signup", async (req, res) => {
                           token: token,
                           data: user
                         }
-                      })
-                    })
-                  })
+                      });
+                    });
+                  });
                 });
               });
             } else {
               res.status(400).json({ message: 'El telefono ya existe' });
-            }
-          })
+            };
+          });
         } else {
           res.status(400).json({ message: 'El correo ya existe' })
-        }
-      })
-    })
+        };
+      });
+    });
   } catch (error) {
     return res.json({ error: error });
-  }
-})
+  };
+});
 // ======= Fin de la ruta de registrar ======
 
 routes.get('/', (req, res) => {

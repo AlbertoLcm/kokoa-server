@@ -33,7 +33,7 @@ routes.post("/login", async (req, res) => {
               if (err)
                 return res.json({ message: "algo salio mal en la query", error: err });
 
-                // // Obtenemos toda la informacion del usuario
+                // Obtenemos toda la informacion del usuario
                 conn.query(`SELECT * FROM ${user[0].rol} JOIN auth ON ${user[0].rol}.auth = auth.id WHERE auth.id = ?`, [user[0].id], async(err, userDB) => {
                   if (err)
                     return res.json({ message: "algo salio mal en la query", error: err });
@@ -54,12 +54,12 @@ routes.post("/login", async (req, res) => {
           }
         } else {
           res.status(400).json({ message: "El usuario no exite" });
-        }
+        };
       });
     });
   } catch (error) {
     return res.json({ error: error });
-  }
+  };
 });
 // // ======= Fin ruta para hacer login a un usuario =======
 
@@ -116,7 +116,7 @@ routes.post("/", isAuthenticated, async (req, res) => {
             }
           });
         });
-      }
+      };
     });
   });
 });

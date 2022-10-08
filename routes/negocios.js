@@ -1,6 +1,5 @@
 const express = require('express');
 const routes = express.Router();
-const conexion = require('../database/db.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
