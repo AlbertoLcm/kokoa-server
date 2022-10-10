@@ -121,5 +121,4 @@ routes.post("/", isAuthenticated, async (req, res) => {
   });
 });
 
-
 module.exports = routes;

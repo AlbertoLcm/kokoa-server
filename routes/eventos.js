@@ -95,69 +95,58 @@ routes.get('/', (req, res) => {
         .status(400)
         .json({ message: 'Algo salio mal con la Query', error: errBD })
 
-    conn.query('SELECT * FROM eventos', (err, result) => {
+    conn.query('SELECT * FROM eventos JOIN auth ON eventos.anfitrion = auth.id', (err, eventosBD) => {
       if (err) return res.send(err)
 
-      res.json(result)
+      res.status(200).json(eventosBD)
     })
   })
 })
 
-// ruta para mostrar eventos de negocio
-routes.get('/:id', (req, res) => {
+// Ruta para mostrar eventos de un negocio
+routes.get('/all/:id', (req, res) => {
   req.getConnection((errBD, conn) => {
     if (errBD)
       return res
         .status(400)
         .json({ message: 'Algo salio mal con la Query', error: errBD })
 
-    conn.query('SELECT * FROM eventos where host_negocio = ? OR host_usuario = ?', [req.params.id, req.params.id], (err, result) => {
-      if (err) return res.send(err)
-
-      res.json(result)
-    })
-  })
-})
-
-// ruta para mostrar eventos de usuario
-
-// Mostrar un evento
-routes.get('/:id', (req, res) => {
-  req.getConnection((errBD, conn) => {
-    if (errBD)
-      return res
-        .status(400)
-        .json({ message: 'Algo salio mal con la Query', error: errBD })
 
     conn.query(
-      'SELECT * FROM eventos WHERE id = ?',
+      'SELECT * FROM eventos JOIN auth ON eventos.anfitrion = auth.id WHERE eventos.anfitrion = ?',
       [req.params.id],
-      (err, result) => {
+      (err, eventoBD) => {
         if (err) return res.send(err)
 
-        res.status(200).json(result)
+        res.status(200).json(eventoBD)
       },
     )
   })
 });
 
-routes.put('/:id', (req, res) => {
+// Mostrar anfitrion de un evento
+routes.get('/:id', (req, res) => {
   req.getConnection((errBD, conn) => {
     if (errBD)
-      return req
+      return res
         .status(400)
         .json({ message: 'Algo salio mal con la Query', error: errBD })
 
+
     conn.query(
-      'UPDATE usuarios set ? WHERE id = ?',
-      [req.body, req.params.id],
-      (err, result) => {
+      'SELECT * FROM eventos JOIN auth ON eventos.anfitrion = auth.id WHERE eventos.id_evento = ?',
+      [req.params.id],
+      (err, eventoBD) => {
         if (err) return res.send(err)
 
-        res.json({ status: '200 OK', descripcion: 'Usuario actualizado' })
+        conn.query(`SELECT * FROM ${eventoBD[0].rol} WHERE auth = ?`, [eventoBD[0].anfitrion], (err, anfitrionBD) => {
+          if (err) return res.status(400).json({ message: 'Algo salio mal con la Query', error: err })
+          
+          res.status(200).json(anfitrionBD[0])
+        });
       },
     )
   })
-})
+});
 
 module.exports = routes
