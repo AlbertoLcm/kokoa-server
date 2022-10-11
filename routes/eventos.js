@@ -103,7 +103,7 @@ routes.get('/', (req, res) => {
   })
 })
 
-// Ruta para mostrar eventos de un negocio
+// Ruta para mostrar todos los eventos de un usuario donde id es el id de la tabla "auth"
 routes.get('/all/:id', (req, res) => {
   req.getConnection((errBD, conn) => {
     if (errBD)
@@ -111,14 +111,13 @@ routes.get('/all/:id', (req, res) => {
         .status(400)
         .json({ message: 'Algo salio mal con la Query', error: errBD })
 
-
     conn.query(
-      'SELECT * FROM eventos JOIN auth ON eventos.anfitrion = auth.id WHERE eventos.anfitrion = ?',
+      'SELECT * FROM eventos JOIN auth ON eventos.anfitrion = auth.id WHERE auth.id = ?',
       [req.params.id],
-      (err, eventoBD) => {
+      (err, eventosBD) => {
         if (err) return res.send(err)
 
-        res.status(200).json(eventoBD)
+        res.status(200).json(eventosBD)
       },
     )
   })

@@ -90,6 +90,24 @@ routes.get("/", (req, res) => {
   });
 });
 
+routes.get("/:id", (req, res) => {
+  req.getConnection((err, conn) => {
+    conn.query("SELECT * FROM auth WHERE id = ?", [req.params.id], (err, userAuth) => {
+      if (err)
+        return res.status(400).json({ message: "algo salio mal en la query", error: err });
+
+      conn.query(`SELECT * FROM ${userAuth[0].rol} WHERE auth = ?`, [userAuth[0].id], (err, user) => {
+        if (err)
+          return res.status(400).json({ message: "algo salio mal en la query", error: err });
+
+        res.json(user);
+      });
+    });
+  });
+})
+
+
+
 routes.post("/", isAuthenticated, async (req, res) => {
   const token = req.headers["authorization"];
   const verify = await jwt.verify(token, process.env.SECRET_KEY);
