@@ -100,7 +100,7 @@ routes.get("/:id", (req, res) => {
         if (err)
           return res.status(400).json({ message: "algo salio mal en la query", error: err });
 
-        res.json(user);
+        res.json({user: user, auth: userAuth});
       });
     });
   });
