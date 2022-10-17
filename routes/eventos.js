@@ -12,8 +12,6 @@ routes.post('/add', (req, res) => {
   const fecha_inicio = `${fechaInicio} ${horaIncio}:00`
   const fecha_termino = `${fechaTermino} ${horaTermino}:00`
 
-  res.status(200).json({fechaIncio: fecha_inicio, fechaTermino: fecha_termino});
-
   try {
     const { lat, lng, id } = req.body
     // Verificamos que ingresen todos los datos
