@@ -5,12 +5,14 @@ const transporter = require('../helpers/configEmail')
 // ======= Ruta para registrar un evento =======
 routes.post('/add', (req, res) => {
   let fechaInicio = req.body.datosEvento.fechaInicio
-  let horaIncio = req.body.datosEvento.horaIncio
+  let horaIncio = req.body.datosEvento.horaInicio
   let fechaTermino = req.body.datosEvento.fechaTermino
   let horaTermino = req.body.datosEvento.horaTermino
 
   const fecha_inicio = `${fechaInicio} ${horaIncio}:00`
   const fecha_termino = `${fechaTermino} ${horaTermino}:00`
+
+  res.status(200).json({fechaIncio: fecha_inicio, fechaTermino: fecha_termino});
 
   try {
     const { lat, lng, id } = req.body
