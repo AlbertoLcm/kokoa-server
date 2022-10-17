@@ -21,7 +21,7 @@ routes.post('/profile', upload.single('avatar'), (req, res, next) => {
 })
 
 routes.get('/', (req, res) => {
-  let filenames = fs.readdirSync('./images');
+  let filenames = fs.readdirSync('../images');
   let files = [];
   let img = {};
   filenames.forEach((file, index) => {
