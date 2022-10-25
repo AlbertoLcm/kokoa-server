@@ -4,7 +4,7 @@ const promisePool = require('../database/dbPromise.js');
 
 // ======= Ruta para agregar un negocio a un usuario =======
 routes.post('/negocio', async(req, res) => {
-  let {Lun1, Lun2, Mar1, Mar2, Mie1, Mie2, Jue1, Jue2, Vie1, Vie2, Sab1, Sab2, Dom1, Dom2} = req.body;
+  let {Lun1, Lun2, Mar1, Mar2, Mie1, Mie2, Jue1, Jue2, Vie1, Vie2, Sab1, Sab2, Dom1, Dom2} = req.body.negocio;
   let horario = `${Lun1} - ${Lun2}, ${Mar1} - ${Mar2}, ${Mie1} - ${Mie2}, ${Jue1} - ${Jue2}, ${Vie1} - ${Vie2}, ${Sab1} - ${Sab2}, ${Dom1} - ${Dom2}`;
   
   try {
