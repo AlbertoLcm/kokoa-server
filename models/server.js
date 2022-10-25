@@ -30,6 +30,7 @@ class Server {
     this.app.use('/api/patrocinadores', require('../routes/patrocinadores.js'));
     this.app.use('/api/eventos', require('../routes/eventos.js'));
     this.app.use('/api/upload', require('../routes/upload.js'));
+    this.app.use('/api/cargos', require('../routes/cargos.js'));
   }
 
   listen() {
