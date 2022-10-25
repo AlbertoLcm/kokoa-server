@@ -20,6 +20,16 @@ routes.post('/negocio', async(req, res) => {
   }
 });
 
+routes.get('/negocio/:id', async(req, res) => {
+  try {
+    const [rows] = await promisePool.query('SELECT * FROM negocios WHERE id_usuario = ?', [req.params.id]);
+    res.status(200).json(rows);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+
 routes.get('/', async(req, res) => {
   try {
     const [rows, fields] = await promisePool.query('SELECT * FROM negocios');
