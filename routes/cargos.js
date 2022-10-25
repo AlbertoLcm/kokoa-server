@@ -6,10 +6,10 @@ const promisePool = require('../database/dbPromise.js');
 routes.post('/negocio', async(req, res) => {
   try {
     await promisePool.query('INSERT INTO negocios SET ?', [{
-      nombre: req.body.nombre,
-      direccion: req.body.direccion,
-      horario: req.body.horario,
-      id_usuario: req.body.id_usuario
+      nombre: req.body.negocio.nombre,
+      direccion: req.body.negocio.direccion,
+      horario: req.body.negocio.horario,
+      id_usuario: req.body.id
     }]);
     res.status(200).json({ message: "Negocio creado correctamente" });
   } catch (error) {
