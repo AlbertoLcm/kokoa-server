@@ -39,4 +39,53 @@ routes.get('/', async(req, res) => {
   }
 });
 
+
+// ======= Ruta para agregar un artista a un usuario =======
+routes.post('/artista', async(req, res) => {
+  try {
+    await promisePool.query('INSERT INTO negocios SET ?', [{
+      nombre: req.body.negocio.nombre,
+      domicilio: req.body.direccion,
+      descripcion: req.body.descripcion,
+      id_usuario: req.body.id
+    }]);
+    res.status(200).json({ message: "Negocio creado correctamente" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+routes.get('/artista/:id', async(req, res) => {
+  try {
+    const [rows] = await promisePool.query('SELECT * FROM artistas WHERE id_usuario = ?', [req.params.id]);
+    res.status(200).json(rows);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// ======= Ruta para agregar un patrocinador a un usuario =======
+routes.post('/patrocinador', async(req, res) => {  
+  try {
+    await promisePool.query('INSERT INTO negocios SET ?', [{
+      nombre: req.body.negocio.nombre,
+      direccion: req.body.direccion,
+      descripcion: req.body.descripcion,
+      id_usuario: req.body.id
+    }]);
+    res.status(200).json({ message: "Negocio creado correctamente" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+routes.get('/patrocinador/:id', async(req, res) => {
+  try {
+    const [rows] = await promisePool.query('SELECT * FROM patrocinadores WHERE id_usuario = ?', [req.params.id]);
+    res.status(200).json(rows);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 module.exports = routes;
