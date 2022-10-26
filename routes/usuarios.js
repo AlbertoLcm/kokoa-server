@@ -71,7 +71,7 @@ routes.post('/signup', async (req, res) => {
                         return res.status(400).json({ message: 'Algo salio mal con la query', error: err })
                       
                       const token = await jwt.sign({
-                        id: user[0].id
+                        id: user.id
                       }, process.env.SECRET_KEY, {
                         expiresIn: process.env.JWT_EXPIRE
                       },)
@@ -80,7 +80,7 @@ routes.post('/signup', async (req, res) => {
                         message: 'Usuario registrado',
                         user: {
                           token: token,
-                          data: user
+                          data: user[0]
                         }
                       });
                     },);

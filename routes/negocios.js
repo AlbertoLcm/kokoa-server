@@ -58,7 +58,7 @@ routes.post("/signup", async (req, res) => {
 
                     conn.query('SELECT * FROM negocios JOIN auth ON negocios.auth = auth.id WHERE auth.id = ?', [auth[0].id], async (err, user) => {
                       const token = await jwt.sign({
-                        id: user[0].id
+                        id: user.id
                       }, process.env.SECRET_KEY, { expiresIn: process.env.JWT_EXPIRE });
                       return res.cookie('token', token).json({
                         success: true,
