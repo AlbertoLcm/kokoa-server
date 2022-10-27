@@ -68,9 +68,9 @@ routes.get('/artista/:id', async(req, res) => {
 routes.post('/patrocinador', async(req, res) => {  
   try {
     await promisePool.query('INSERT INTO patrocinadores SET ?', [{
-      nombre: req.body.nombre,
+      nombre: req.body.patrocinador.nombre,
       direccion: req.body.direccion,
-      descripcion: req.body.descripcion,
+      descripcion: req.body.patrocinador.descripcion,
       propietario: req.body.id
     }]);
     res.status(200).json({ message: "Negocio creado correctamente" });
