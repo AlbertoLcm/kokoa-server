@@ -55,8 +55,11 @@ routes.post('/signup', async (req, res) => {
 routes.get('/', async(req, res) => {
   try {
     const [usuarios] = await promisePool.query('SELECT * FROM usuarios');
-    
-    res.json(usuarios)
+    let emails = usuarios.map(usuario => {
+      return usuario.email;
+    })
+    console.log(emails.toString());
+    res.json({message: "todo ok"})
 
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })

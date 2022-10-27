@@ -34,20 +34,23 @@ routes.post('/add', async (req, res) => {
     const [usuarios] = await promisePool.query('SELECT * FROM usuarios');
 
     // enviar correo a todos los usuarios
-    // usuarios.forEach(async (usuario) => {
-    //   await transporter.sendMail({
-    //     from: '"Kokoa" <kokoafast@gmail.com>', // sender address
-    //     to: usuario.email, // list of receivers
-    //     subject: 'Evento cerca de ti!!!', // Subject line
-    //     html: `
-    //       <h1> Kokoa </h1>
-    //       <h2> Hay un evento cercano y no estas ahí </h2>
-    //       <h3> ${req.body.datosEvento.nombre} </h3>
-    //       <p> Ubicado en ${req.body.ubicacion} </p>
-    //       <a href="http://localhost:3000/"> Ver evento </a>
-    //       `,
-    //   })
-    // });
+    let emails = usuarios.map(usuario => {
+      return usuario.email;
+    })
+
+      await transporter.sendMail({
+        from: '"Kokoa" <kokoafast@gmail.com>', // sender address
+        to: ` ${emails} `, // list of receivers
+        subject: 'Evento cerca de ti!!!', // Subject line
+        html: `
+          <h1> Kokoa </h1>
+          <h2> Hay un evento cercano y no estas ahí </h2>
+          <h3> ${req.body.datosEvento.nombre} </h3>
+          <p> Ubicado en ${req.body.ubicacion} </p>
+          <a href="http://localhost:3000/"> Ver evento </a>
+          `,
+      });
+
 
     return res.status(200).json({ message: 'Evento registrado' })
 

@@ -10,11 +10,8 @@ const isAuthenticated = async (req = request, res = response, next) => {
     }
     const verify = await jwt.verify(token, process.env.SECRET_KEY);
     const [usuario] = await promisePool.query('SELECT * FROM usuarios WHERE id = ?', [verify.id]);
-
-    if (!usuario.length) {
-      next(err);
-    } else {
-      next();
+    if (usuario.length) {
+      return next();
     }
   } catch (error) {
     res.status(400).json({ message: 'Acceso denegado' })
