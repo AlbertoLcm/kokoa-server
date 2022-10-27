@@ -2,6 +2,7 @@ const express = require('express');
 const routes = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const promisePool = require('../database/dbPromise');
 
 // ======= Ruta para registrar un artista =======
 routes.post("/signup", async (req, res) => {
@@ -87,18 +88,13 @@ routes.post("/signup", async (req, res) => {
 });
 // ======= Fin de la ruta de registrar ======
 
-routes.get('/', (req, res) => {
-  req.getConnection((errBD, conn) => {
-    if (errBD)
-      return req.status(400).json({ message: 'Algo salio mal con la Query', error: errBD });
-
-    conn.query('SELECT * FROM artistas, auth WHERE artistas.auth = auth.id', (err, result) => {
-      if (err)
-        return res.send(err)
-
-      res.json(result);
-    });
-  });
+routes.get('/', async(req, res) => {
+  try {
+    const [artistas] = await promisePool.query('SELECT * FROM artistas');
+    res.status(200).json(artistas);
+  } catch (error) {
+    return req.status(400).json({ message: 'Algo salio mal con la Query', error: error });
+  }
 });
 
 routes.delete('/:id', (req, res) => {

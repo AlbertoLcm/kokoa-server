@@ -87,18 +87,13 @@ routes.post("/signup", async (req, res) => {
 });
 // ======= Fin de la ruta de registrar ======
 
-routes.get('/', (req, res) => {
-  req.getConnection((errBD, conn) => {
-    if (errBD)
-      return req.status(400).json({ message: 'Algo salio mal con la Query', error: errBD });
-
-    conn.query('SELECT * FROM patrocinadores, auth WHERE patrocinadores.auth = auth.id', (err, result) => {
-      if (err)
-        return res.send(err)
-
-      res.json(result);
-    });
-  })
+routes.get('/', async(req, res) => {
+  try {
+    const [patrocinadores] = await promisePool.query('SELECT * FROM patrocinadores');
+    res.status(200).json(patrocinadores);
+  } catch (error) {
+    return req.status(400).json({ message: 'Algo salio mal con la Query', error: error });
+  }
 });
 
 routes.delete('/:id', (req, res) => {

@@ -57,7 +57,7 @@ routes.post('/artista', async(req, res) => {
 
 routes.get('/artista/:id', async(req, res) => {
   try {
-    const [rows] = await promisePool.query('SELECT * FROM artistas WHERE id_usuario = ?', [req.params.id]);
+    const [rows] = await promisePool.query('SELECT * FROM artistas WHERE propietario = ?', [req.params.id]);
     res.status(200).json(rows);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -81,7 +81,7 @@ routes.post('/patrocinador', async(req, res) => {
 
 routes.get('/patrocinador/:id', async(req, res) => {
   try {
-    const [rows] = await promisePool.query('SELECT * FROM patrocinadores WHERE id_usuario = ?', [req.params.id]);
+    const [rows] = await promisePool.query('SELECT * FROM patrocinadores WHERE propietario = ?', [req.params.id]);
     res.status(200).json(rows);
   } catch (error) {
     res.status(400).json({ error: error.message });
