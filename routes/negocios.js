@@ -2,6 +2,7 @@ const express = require('express');
 const routes = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const promisePool = require('../database/dbPromise');
 
 // ======= Ruta para registrar un negocio =======
 routes.post("/signup", async (req, res) => {
@@ -87,32 +88,24 @@ routes.post("/signup", async (req, res) => {
 })
 // ======= Fin de la ruta de registrar ======
 
-routes.get('/', (req, res) => {
-  req.getConnection((errBD, conn) => {
-    if (errBD)
-      return req.status(400).json({ message: 'Algo salio mal con la Query', error: errBD });
-
-    conn.query('SELECT * FROM negocios, auth WHERE negocios.auth = auth.id', (err, result) => {
-      if (err)
-        return res.send(err)
-
-      res.json(result);
-    });
-  })
+routes.get('/', async(req, res) => {
+  try {
+    const [negocios] = await promisePool.query('SELECT * FROM negocios');
+    res.status(200).json(negocios);
+  } catch (error) {
+    return req.status(400).json({ message: 'Algo salio mal con la Query', error: error });
+  }
 });
 
-routes.delete('/:id', (req, res) => {
-  req.getConnection((errBD, conn) => {
-    if (errBD)
-      return req.status(400).json({ message: 'Algo salio mal con la Query', error: errBD });
-
-    conn.query('DELETE FROM negocios WHERE id = ?', [req.params.id], (err, result) => {
-      if (err)
-        return res.send(err)
-
-      res.status(200).json({ meesage: 'Negocio borrado' });
-    });
-  })
+// Mostrar negocio, recibe el id del negocio
+routes.get('/:id', async(req, res) => {
+  try {
+    const [negocio] = await promisePool.query(`SELECT * FROM negocios WHERE id = ?`, [req.params.id]);
+    
+    res.status(200).json(negocio[0])
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
+  }
 });
 
 routes.put('/:id', (req, res) => {

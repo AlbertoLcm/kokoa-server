@@ -12,7 +12,7 @@ routes.post('/negocio', async(req, res) => {
       nombre: req.body.negocio.nombre,
       direccion: req.body.direccion,
       horario: horario,
-      id_usuario: req.body.id
+      propietario: req.body.id
     }]);
     res.status(200).json({ message: "Negocio creado correctamente" });
   } catch (error) {
@@ -22,7 +22,7 @@ routes.post('/negocio', async(req, res) => {
 
 routes.get('/negocio/:id', async(req, res) => {
   try {
-    const [rows] = await promisePool.query('SELECT * FROM negocios WHERE id_usuario = ?', [req.params.id]);
+    const [rows] = await promisePool.query('SELECT * FROM negocios WHERE propietario = ?', [req.params.id]);
     res.status(200).json(rows);
   } catch (error) {
     res.status(400).json({ error: error.message });

@@ -2,148 +2,65 @@ const express = require('express')
 const routes = express.Router()
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const promisePool = require('../database/dbPromise')
 
 // ======= Ruta para registrar un usuario =======
 routes.post('/signup', async (req, res) => {
+
+  const {nombre, apellidos, email, telefono, password} = req.body
+  // Paso 1 - Verificamos que ingresen todos los datos
+  if (!nombre || !apellidos || !email || !telefono || !password) {
+    return res.status(400).json({ message: 'Debes ingresar todos los datos' })
+  }
+  // Paso 2 - Hasheamos la contraseña
+  const salt = await bcrypt.genSalt(10)
+  const hashPassword = await bcrypt.hash(req.body.password, salt)
+  req.body.password = hashPassword
+
   try {
-    const {
-      nombre,
-      apellidos,
-      email,
-      telefono,
-      password
-    } = req.body
-    // Verificamos que ingresen todos los datos
-    if (!nombre || !apellidos || !email || !telefono || !password) {
-      return res.status(400).json({ message: 'Debes ingresar todos los datos' })
+    // Paso 3 - Verificamos si el correo y el telefono existe
+    const [emailBD] = await promisePool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+    if (emailBD.length) {
+      return res.status(400).json({ message: 'El correo ya existe' })
     }
-    // Hasheamos la contraseña
-    const salt = await bcrypt.genSalt(10)
-    const hashPassword = await bcrypt.hash(req.body.password, salt)
-    req.body.password = hashPassword
-    // Inciamos conexion con la BD
-    req.getConnection((errBD, conn) => {
-      if (errBD)
-        return res.json({ message: 'Algo salio mal con la Query', error: errBD })
+    const [telefonoBD] = await promisePool.query('SELECT * FROM usuarios WHERE telefono = ?', [telefono]);
+    if (telefonoBD.length) {
+      return res.status(400).json({ message: 'El telefono ya existe' })
+    }
+    // Paso 4 - Insertamos el usuario
+    const [insert] = await promisePool.query('INSERT INTO usuarios SET ?', [req.body]);
+    // Paso 5 - Creamos el token con el usuario ingresado
+    const [user] = await promisePool.query('SELECT * FROM usuarios WHERE id = ?', [insert.insertId]);
 
-      // Verificamos si existe el usuarios en la BD
-      conn.query('SELECT * FROM auth WHERE email = ?', [req.body.email], (err, emailRes) => {
-        if (err)
-          return res.status(400).json({ message: 'Algo salio mal en la query', error: err })
+    const token = await jwt.sign({
+      id: user.id
+    }, process.env.SECRET_KEY, {
+      expiresIn: process.env.JWT_EXPIRE
+    },)
 
-        // Verificamos si el telefono existe en la BD
-        if (!emailRes.length) {
-          conn.query('SELECT * FROM auth WHERE telefono = ?', [req.body.telefono], (err, telefonoRes) => {
-            if (err)
-              return res.status(400).json({ message: 'Algo salio mal en la query', error: err })
-
-            // Insertamos todo en la tabla auth
-            if (!telefonoRes.length) {
-              conn.query('INSERT INTO auth SET ?', [
-                {
-                  email: req.body.email,
-                  telefono: req.body.telefono,
-                  password: req.body.password,
-                  rol: req.body.rol
-                },
-              ], (err) => {
-                if (err)
-                  return res.status(400).json({ message: 'Algo salio mal en la query', msg: err })
-
-                // Buscamos la data del usuario ingresado
-                conn.query('SELECT * FROM auth WHERE email = ?', [req.body.email], (err, auth) => {
-                  if (err)
-                    return res.status(400).json({ meesage: 'Algo salio mal con la query', err: err })
-
-                  // Ingresamos la data en la tabla usuarios
-                  conn.query('INSERT INTO usuarios SET ?', [
-                    {
-                      nombre: req.body.nombre,
-                      apellidos: req.body.apellidos,
-                      auth: auth[0].id
-                    },
-                  ], (err) => {
-                    if (err)
-                      return res(400).json({ message: 'algo salio mal en la query', error: err })
-
-                    conn.query(`SELECT * FROM usuarios JOIN auth ON usuarios.auth = auth.id WHERE auth.id = ?`, [auth[0].id], async (err, user) => {
-                      if (err)
-                        return res.status(400).json({ message: 'Algo salio mal con la query', error: err })
-                      
-                      const token = await jwt.sign({
-                        id: user.id
-                      }, process.env.SECRET_KEY, {
-                        expiresIn: process.env.JWT_EXPIRE
-                      },)
-                      return res.cookie('token', token).json({
-                        success: true,
-                        message: 'Usuario registrado',
-                        user: {
-                          token: token,
-                          data: user[0]
-                        }
-                      });
-                    },);
-                  },);
-                },);
-              },);
-            } else {
-              res.status(400).json({ message: 'El telefono ya existe' })
-            }
-          },)
-        } else {
-          res.status(400).json({ message: 'El correo ya existe' })
-        }
-      });
+    return res.cookie('token', token).json({
+      success: true,
+      message: 'Usuario registrado',
+      user: {
+        token: token,
+        data: user[0]
+      }
     });
   } catch (error) {
-    return res.json({ error: error })
+    return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
   }
 })
 // ======= Fin de la ruta de registrar ======
 
-routes.get('/', (req, res) => {
-  req.getConnection((errBD, conn) => {
-    if (errBD)
-      return res.status(400).json({ message: 'Algo salio mal con la Query', error: errBD })
+routes.get('/', async(req, res) => {
+  try {
+    const [usuarios] = await promisePool.query('SELECT * FROM usuarios');
+    
+    res.json(usuarios)
 
-    conn.query('SELECT * FROM usuarios, auth WHERE usuarios.auth = auth.id;', (err, usuarios) => {
-      if (err)
-        return res.send(err)
-
-      res.json(usuarios)
-    },)
-  })
-})
-
-routes.delete('/:id', (req, res) => {
-  req.getConnection((errBD, conn) => {
-    if (errBD)
-      return req.status(400).json({ message: 'Algo salio mal con la Query', error: err })
-
-    conn.query('DELETE FROM usuarios WHERE id = ?', [req.params.id], (err, result) => {
-      if (err)
-        return res.send(err)
-
-      res.status(200).json({ meesage: 'Usuario borrado' })
-    },)
-  })
-})
-
-routes.put('/:id', (req, res) => {
-  req.getConnection((errBD, conn) => {
-    if (errBD)
-      return req.status(400).json({ message: 'Algo salio mal con la Query', error: err })
-
-    conn.query('UPDATE usuarios set ? WHERE id = ?', [
-      req.body, req.params.id
-    ], (err, result) => {
-      if (err)
-        return res.send(err)
-
-      res.json({ status: '200 OK', descripcion: 'Usuario actualizado' })
-    },)
-  })
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
+  }
 })
 
 module.exports = routes
