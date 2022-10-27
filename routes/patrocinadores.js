@@ -2,6 +2,7 @@ const express = require('express');
 const routes = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const promisePool = require('../database/dbPromise');
 
 // ======= Ruta para registrar un patrocinador =======
 routes.post("/signup", async (req, res) => {
@@ -92,7 +93,7 @@ routes.get('/', async(req, res) => {
     const [patrocinadores] = await promisePool.query('SELECT * FROM patrocinadores');
     res.status(200).json(patrocinadores);
   } catch (error) {
-    return req.status(400).json({ message: 'Algo salio mal con la Query', error: error });
+    return res.status(400).json({ message: 'Algo salio mal con la Query', error: error });
   }
 });
 
