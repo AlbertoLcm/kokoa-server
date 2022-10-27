@@ -67,11 +67,11 @@ routes.get('/artista/:id', async(req, res) => {
 // ======= Ruta para agregar un patrocinador a un usuario =======
 routes.post('/patrocinador', async(req, res) => {  
   try {
-    await promisePool.query('INSERT INTO negocios SET ?', [{
+    await promisePool.query('INSERT INTO patrocinadores SET ?', [{
       nombre: req.body.nombre,
       direccion: req.body.direccion,
       descripcion: req.body.descripcion,
-      id_usuario: req.body.id
+      propietario: req.body.id
     }]);
     res.status(200).json({ message: "Negocio creado correctamente" });
   } catch (error) {
