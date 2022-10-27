@@ -108,17 +108,4 @@ routes.get('/:id', async(req, res) => {
   }
 });
 
-routes.put('/:id', (req, res) => {
-  req.getConnection((errBD, conn) => {
-    conn.query('UPDATE negocios set ? WHERE id = ?', [
-      req.body, req.params.id
-    ], (err, result) => {
-      if (err)
-        return res.send(err)
-
-      res.json({ status: '200 OK', descripcion: 'Negocio actualizado' });
-    });
-  })
-});
-
 module.exports = routes;

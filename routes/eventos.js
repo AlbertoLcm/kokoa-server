@@ -38,19 +38,18 @@ routes.post('/add', async (req, res) => {
       return usuario.email;
     })
 
-      await transporter.sendMail({
-        from: '"Kokoa" <kokoafast@gmail.com>', // sender address
-        to: ` ${emails} `, // list of receivers
-        subject: 'Evento cerca de ti!!!', // Subject line
-        html: `
-          <h1> Kokoa </h1>
-          <h2> Hay un evento cercano y no estas ahí </h2>
-          <h3> ${req.body.datosEvento.nombre} </h3>
-          <p> Ubicado en ${req.body.ubicacion} </p>
-          <a href="http://localhost:3000/"> Ver evento </a>
-          `,
-      });
-
+    await transporter.sendMail({
+      from: '"Kokoa" <kokoafast@gmail.com>', // sender address
+      to: ` ${emails} `, // list of receivers
+      subject: 'Evento cerca de ti!!!', // Subject line
+      html: `
+        <h1> Kokoa </h1>
+        <h2> Hay un evento cercano y no estas ahí </h2>
+        <h3> ${req.body.datosEvento.nombre} </h3>
+        <p> Ubicado en ${req.body.ubicacion} </p>
+        <a href="http://localhost:3000/"> Ver evento </a>
+        `,
+    });
 
     return res.status(200).json({ message: 'Evento registrado' })
 
@@ -80,11 +79,11 @@ routes.get('/all/:id', async (req, res) => {
 });
 
 // Mostrar anfitrion de un evento, recibe el id del evento
-routes.get('/:id', async(req, res) => {
+routes.get('/:id', async (req, res) => {
   try {
     const [eventoBase] = await promisePool.query('SELECT * FROM eventos WHERE id_evento = ?', [req.params.id])
     const [anfitrion] = await promisePool.query(`SELECT * FROM ${eventoBase[0].rol_anfitrion} WHERE id = ?`, [eventoBase[0].anfitrion]);
-    
+
     res.status(200).json(anfitrion[0])
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
