@@ -48,7 +48,7 @@ routes.post('/artista', async(req, res) => {
       domicilio: req.body.direccion,
       descripcion: req.body.artista.descripcion,
       tipo: req.body.artista.tipo,
-      id_usuario: req.body.id
+      propietario: req.body.id
     }]);
     res.status(200).json({ message: "Artista creado correctamente" });
   } catch (error) {
