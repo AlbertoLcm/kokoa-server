@@ -43,13 +43,14 @@ routes.get('/', async(req, res) => {
 // ======= Ruta para agregar un artista a un usuario =======
 routes.post('/artista', async(req, res) => {
   try {
-    await promisePool.query('INSERT INTO negocios SET ?', [{
-      nombre: req.body.negocio.nombre,
+    await promisePool.query('INSERT INTO artistas SET ?', [{
+      nombre: req.body.artista.nombre,
       domicilio: req.body.direccion,
-      descripcion: req.body.descripcion,
+      descripcion: req.body.artista.descripcion,
+      tipo: req.body.artista.tipo,
       id_usuario: req.body.id
     }]);
-    res.status(200).json({ message: "Negocio creado correctamente" });
+    res.status(200).json({ message: "Artista creado correctamente" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
