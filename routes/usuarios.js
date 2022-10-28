@@ -64,6 +64,21 @@ routes.get('/', async(req, res) => {
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
   }
-})
+});
+
+routes.put('/:id', async(req, res) => {
+  
+  // filtro los datos vacios
+  const datosFiltados = Object.keys(req.body).filter(key => req.body[key] === '');
+
+  // elimino los datos vacios
+  datosFiltados.forEach(key => delete req.body[key]);
+
+  try {
+    await promisePool.query('UPDATE usuarios SET ? WHERE id = ?', [req.body, req.params.id]);
+  } catch (error) {
+    res.status(400).json({message: 'Algo salio mal con la Query', error: error})
+  }
+});
 
 module.exports = routes
