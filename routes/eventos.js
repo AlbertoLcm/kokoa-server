@@ -5,20 +5,22 @@ const transporter = require('../helpers/configEmail')
 
 // ======= Ruta para registrar un evento =======
 routes.post('/add', async (req, res) => {
-  let fechaInicio = req.body.datosEvento.fechaInicio
-  let horaIncio = req.body.datosEvento.horaInicio
-  let fechaTermino = req.body.datosEvento.fechaTermino
-  let horaTermino = req.body.datosEvento.horaTermino
+  const { lat, lng, id } = req.body;
+  const nombre = req.body.datosEvento.nombre;
+  let fechaInicio = req.body.datosEvento.fechaInicio;
+  let horaIncio = req.body.datosEvento.horaInicio;
+  let fechaTermino = req.body.datosEvento.fechaTermino;
+  let horaTermino = req.body.datosEvento.horaTermino;
+  
+  // Verificamos que ingresen todos los datos
+  if (!lat || !lng || !nombre, !fechaInicio || !horaIncio || !fechaTermino || !horaTermino) {
+    return res.status(400).json({ message: 'Debes ingresar todos los datos' })
+  }
 
   const fecha_inicio = `${fechaInicio} ${horaIncio}:00`
   const fecha_termino = `${fechaTermino} ${horaTermino}:00`
 
   try {
-    const { lat, lng, id } = req.body
-    // Verificamos que ingresen todos los datos
-    if (!lat || !lng) {
-      return res.status(400).json({ message: 'Debes ingresar todos los datos' })
-    }
 
     await promisePool.query('INSERT INTO eventos SET ?', [{
       nombre: req.body.datosEvento.nombre,
@@ -28,28 +30,30 @@ routes.post('/add', async (req, res) => {
       lat: req.body.lat,
       lng: req.body.lng,
       rol_anfitrion: req.body.rol,
-      anfitrion: id
+      anfitrion: id,
+      capacidad: req.body.datosEvento.capacidad,
+      precio: req.body.datosEvento.costo
     }]);
 
-    const [usuarios] = await promisePool.query('SELECT * FROM usuarios');
+    // const [usuarios] = await promisePool.query('SELECT * FROM usuarios');
 
-    // enviar correo a todos los usuarios
-    let emails = usuarios.map(usuario => {
-      return usuario.email;
-    })
+    // // enviar correo a todos los usuarios
+    // let emails = usuarios.map(usuario => {
+    //   return usuario.email;
+    // })
 
-    await transporter.sendMail({
-      from: '"Kokoa" <kokoafast@gmail.com>', // sender address
-      to: ` ${emails} `, // list of receivers
-      subject: 'Evento cerca de ti!!!', // Subject line
-      html: `
-        <h1> Kokoa </h1>
-        <h2> Hay un evento cercano y no estas ahí </h2>
-        <h3> ${req.body.datosEvento.nombre} </h3>
-        <p> Ubicado en ${req.body.ubicacion} </p>
-        <a href="http://localhost:3000/"> Ver evento </a>
-        `,
-    });
+    // await transporter.sendMail({
+    //   from: '"Kokoa" <kokoafast@gmail.com>', // sender address
+    //   to: ` ${emails} `, // list of receivers
+    //   subject: 'Evento cerca de ti!!!', // Subject line
+    //   html: `
+    //     <h1> Kokoa </h1>
+    //     <h2> Hay un evento cercano y no estas ahí </h2>
+    //     <h3> ${req.body.datosEvento.nombre} </h3>
+    //     <p> Ubicado en ${req.body.ubicacion} </p>
+    //     <a href="http://localhost:3000/"> Ver evento </a>
+    //     `,
+    // });
 
     return res.status(200).json({ message: 'Evento registrado' })
 
