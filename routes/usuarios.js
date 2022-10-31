@@ -19,16 +19,22 @@ routes.post('/signup', async (req, res) => {
 
   try {
     // Paso 3 - Verificamos si el correo y el telefono existe
-    const [emailBD] = await promisePool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+    const [emailBD] = await promisePool.query('SELECT * FROM usuarios WHERE email = ?', [email.trim()]);
     if (emailBD.length) {
       return res.status(400).json({ message: 'El correo ya existe' })
     }
-    const [telefonoBD] = await promisePool.query('SELECT * FROM usuarios WHERE telefono = ?', [telefono]);
+    const [telefonoBD] = await promisePool.query('SELECT * FROM usuarios WHERE telefono = ?', [telefono.trim()]);
     if (telefonoBD.length) {
       return res.status(400).json({ message: 'El telefono ya existe' })
     }
     // Paso 4 - Insertamos el usuario
-    const [insert] = await promisePool.query('INSERT INTO usuarios SET ?', [req.body]);
+    const [insert] = await promisePool.query('INSERT INTO usuarios SET ?', [{
+      nombre: nombre.trim(),
+      apellidos: apellidos.trim(),
+      email: email.trim(),
+      telefono: telefono.trim(),
+      password: req.body.password
+    }]);
     // Paso 5 - Creamos el token con el usuario ingresado
     const [user] = await promisePool.query('SELECT * FROM usuarios WHERE id = ?', [insert.insertId]);
 

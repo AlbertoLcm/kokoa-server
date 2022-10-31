@@ -15,7 +15,7 @@ routes.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Debes ingresar todos los datos" });
     }
     // Paso 2 - Verificamos si el usuario existe
-    const [user] = await promisePool.query("SELECT * FROM usuarios WHERE email = ? or telefono = ?", [email, email]);
+    const [user] = await promisePool.query("SELECT * FROM usuarios WHERE email = ? or telefono = ?", [email.trim(), email.trim()]);
     if (!user.length) {
       return res.status(400).json({ message: "El usuario no exite" });
     }
