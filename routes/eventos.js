@@ -63,6 +63,7 @@ routes.post('/add', async (req, res) => {
 })
 // ======= Fin de la ruta de registrar ======
 
+// Ruta para mostrar todos lo eventos en general
 routes.get('/', async (req, res) => {
   try {
     const [eventosBD] = await promisePool.query('SELECT * FROM eventos')
@@ -87,8 +88,20 @@ routes.get('/:id', async (req, res) => {
   try {
     const [eventoBase] = await promisePool.query('SELECT * FROM eventos WHERE id_evento = ?', [req.params.id])
     const [anfitrion] = await promisePool.query(`SELECT * FROM ${eventoBase[0].rol_anfitrion} WHERE id = ?`, [eventoBase[0].anfitrion]);
+    return res.status(200).json(anfitrion[0])
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
+  }
+});
 
-    res.status(200).json(anfitrion[0])
+// Ruta para mostrar un evento en especifico, recibe el id del evento
+routes.get('/evento/:id', async (req, res) => {
+  try {
+    const [evento] = await promisePool.query('SELECT * FROM eventos WHERE id_evento = ?', [req.params.id])
+    if (!evento.length) {
+      return res.status(400).json({ message: 'No se encontro el evento' })
+    }
+    return res.status(200).json(evento[0])
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
   }
