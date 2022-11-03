@@ -11,9 +11,10 @@ routes.post('/add', async (req, res) => {
   let horaIncio = req.body.datosEvento.horaInicio;
   let fechaTermino = req.body.datosEvento.fechaTermino;
   let horaTermino = req.body.datosEvento.horaTermino;
+  const descripcion = req.body.datosEvento.descripcion;
   
   // Verificamos que ingresen todos los datos
-  if (!lat || !lng || !nombre, !fechaInicio || !horaIncio || !fechaTermino || !horaTermino) {
+  if (!lat || !lng || !nombre, !fechaInicio || !horaIncio || !fechaTermino || !horaTermino || !descripcion) {
     return res.status(400).json({ message: 'Debes ingresar todos los datos' })
   }
 
@@ -32,7 +33,9 @@ routes.post('/add', async (req, res) => {
       rol_anfitrion: req.body.rol,
       anfitrion: id,
       capacidad: req.body.datosEvento.capacidad,
-      precio: req.body.datosEvento.costo
+      precio: req.body.datosEvento.costo,
+      descripcion: req.body.datosEvento.descripcion,
+      tipo: req.body.datosEvento.tipo,
     }]);
 
     // const [usuarios] = await promisePool.query('SELECT * FROM usuarios');
