@@ -53,10 +53,20 @@ routes.post('/signup', async (req, res) => {
       }
     });
   } catch (error) {
-    return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
   }
 })
 // ======= Fin de la ruta de registrar ======
+
+routes.get('/:id', async(req, res) => {
+  try {
+    const [usuarios] = await promisePool.query('SELECT * FROM usuarios WHERE id = ?', [req.params.id]);
+    res.json({message: "todo ok", usuarios: usuarios[0]})
+
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
+  }
+});
 
 routes.get('/', async(req, res) => {
   try {
@@ -68,7 +78,7 @@ routes.get('/', async(req, res) => {
     res.json({message: "todo ok"})
 
   } catch (error) {
-    return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
   }
 });
 
@@ -83,7 +93,7 @@ routes.put('/:id', async(req, res) => {
   try {
     await promisePool.query('UPDATE usuarios SET ? WHERE id = ?', [req.body, req.params.id]);
   } catch (error) {
-    res.status(400).json({message: 'Algo salio mal con la Query', error: error})
+    res.status(400).json({message: 'Algo salio mal', error: error})
   }
 });
 

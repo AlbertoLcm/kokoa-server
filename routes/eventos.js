@@ -1,7 +1,7 @@
 const express = require('express')
 const promisePool = require('../database/dbPromise')
 const routes = express.Router()
-const transporter = require('../helpers/configEmail')
+// const transporter = require('../helpers/configEmail')
 
 // ======= Ruta para registrar un evento =======
 routes.post('/add', async (req, res) => {
@@ -38,9 +38,9 @@ routes.post('/add', async (req, res) => {
       tipo: req.body.datosEvento.tipo,
     }]);
 
-    // const [usuarios] = await promisePool.query('SELECT * FROM usuarios');
-
+    
     // // enviar correo a todos los usuarios
+    // const [usuarios] = await promisePool.query('SELECT * FROM usuarios');
     // let emails = usuarios.map(usuario => {
     //   return usuario.email;
     // })
@@ -54,25 +54,24 @@ routes.post('/add', async (req, res) => {
     //     <h2> Hay un evento cercano y no estas ahí </h2>
     //     <h3> ${req.body.datosEvento.nombre} </h3>
     //     <p> Ubicado en ${req.body.ubicacion} </p>
-    //     <a href="http://localhost:3000/"> Ver evento </a>
     //     `,
     // });
 
-    return res.status(200).json({ message: 'Evento registrado' })
+    return res.status(201).json({ message: 'Evento registrado' })
 
   } catch (error) {
-    return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
   }
 })
 // ======= Fin de la ruta de registrar ======
 
-// Ruta para mostrar todos lo eventos en general
+// Ruta para mostrar todos los eventos en general
 routes.get('/', async (req, res) => {
   try {
     const [eventosBD] = await promisePool.query('SELECT * FROM eventos')
     res.status(200).json(eventosBD)
   } catch (error) {
-    return res.status(400).json({ message: 'Algo salio mal con la Query', error: errBD })
+    return res.status(400).json({ message: 'Algo salio mal', error: errBD })
   }
 })
 
@@ -82,7 +81,7 @@ routes.get('/all/:id', async (req, res) => {
     const [eventos] = await promisePool.query('SELECT * FROM eventos WHERE anfitrion = ? AND rol_anfitrion = "negocios"', [req.params.id])
     res.status(200).json(eventos)
   } catch (error) {
-    return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
   }
 });
 
@@ -93,7 +92,7 @@ routes.get('/:id', async (req, res) => {
     const [anfitrion] = await promisePool.query(`SELECT * FROM ${eventoBase[0].rol_anfitrion} WHERE id = ?`, [eventoBase[0].anfitrion]);
     return res.status(200).json(anfitrion[0])
   } catch (error) {
-    return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
   }
 });
 
@@ -106,7 +105,25 @@ routes.get('/evento/:id', async (req, res) => {
     }
     return res.status(200).json(evento[0])
   } catch (error) {
-    return res.status(400).json({ message: 'Algo salio mal con la Query', error: error })
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
+  }
+});
+
+// Ruta para agregar asistentes al evento, recibe el id del evento y el id del usuario
+routes.post('/asistente', async (req, res) => {
+  const { id_evento, id_usuario } = req.body;
+
+  if(!id_evento || !id_usuario) {
+    return res.status(400).json({ message: 'Se necesita el id del evento y usuario' })
+  }
+  
+  try {
+    await promisePool.query('INSERT INTO asistentes SET ?', [req.body]);
+    const [data] = await promisePool.query('UPDATE eventos SET asistentes_cont = asistentes_cont + 1 WHERE id_evento = ?', [id_evento]);
+    
+    return res.status(201).json({ message: 'Asistente agregado', inf: data })
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
   }
 });
 
