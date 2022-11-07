@@ -61,7 +61,7 @@ routes.post('/signup', async (req, res) => {
 routes.get('/:id', async(req, res) => {
   try {
     const [usuarios] = await promisePool.query('SELECT * FROM usuarios WHERE id = ?', [req.params.id]);
-    res.json({message: "todo ok", usuarios: usuarios[0]})
+    res.json(usuarios[0])
 
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error })

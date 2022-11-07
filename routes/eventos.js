@@ -38,6 +38,7 @@ routes.post('/add', async (req, res) => {
       tipo: req.body.datosEvento.tipo,
     }]);
 
+    // TODO: Arreglar servidor de correo
     
     // // enviar correo a todos los usuarios
     // const [usuarios] = await promisePool.query('SELECT * FROM usuarios');
@@ -122,6 +123,40 @@ routes.post('/asistente', async (req, res) => {
     const [data] = await promisePool.query('UPDATE eventos SET asistentes_cont = asistentes_cont + 1 WHERE id_evento = ?', [id_evento]);
     
     return res.status(201).json({ message: 'Asistente agregado', inf: data })
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
+  }
+});
+
+// Ruta para agregar asistentes al evento, recibe el id del evento y el id del usuario
+routes.post('/ausentar', async (req, res) => {
+  const { id_evento, id_usuario } = req.body;
+
+  if(!id_evento || !id_usuario) {
+    return res.status(400).json({ message: 'Se necesita el id del evento y usuario' })
+  }
+  
+  try {
+    await promisePool.query('DELETE FROM asistentes WHERE id_usuario = ? AND id_evento = ?', [id_usuario, id_evento]);
+    const [data] = await promisePool.query('UPDATE eventos SET asistentes_cont = asistentes_cont - 1 WHERE id_evento = ?', [id_evento]);
+    
+    return res.status(201).json({ message: 'Asistente agregado', inf: data })
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
+  }
+});
+
+// Comprobacion de asistencia, recibe el id del evento y el id del usuario
+routes.post('/asistente/check', async (req, res) => {
+  const { id_usuario } = req.body;
+
+  if(!id_usuario) {
+    return res.status(400).json({ message: 'Se necesita el id del usuario' })
+  }
+  
+  try {
+    const [data] = await promisePool.query('SELECT * FROM asistentes WHERE id_usuario = ?', [id_usuario]);
+    return res.status(200).json(data)
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error })
   }
