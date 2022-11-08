@@ -39,4 +39,31 @@ routes.put('/:id', async(req, res) => {
   }
 });
 
+// Ruta para mostrar los comentarios de un negocio, recibe el id del negocio
+routes.get('/comentarios/:id', async(req, res) => {
+  try {
+    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_negocio WHERE id_negocio = ?', [req.params.id]);
+    res.status(200).json(comentarios);
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error });
+  }
+});
+
+// Ruta para añadir un comentario a un negocio, recibe el id del negocio y el id del usuario
+routes.post('/comentarios', async(req, res) => {
+
+  const { id_negocio, id_usuario, comentario } = req.body;
+
+  if(!id_negocio || !id_usuario || !comentario) {
+    return res.status(400).json({ message: 'Faltan datos' });
+  }
+  
+  try {
+    await promisePool.query('INSERT INTO comentarios_negocio SET ?', [req.body]);
+    res.status(200).json({ message: 'Comentario añadido' });
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error });
+  }
+});
+
 module.exports = routes;
