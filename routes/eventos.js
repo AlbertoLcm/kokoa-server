@@ -166,6 +166,12 @@ routes.post('/asistente/check', async (req, res) => {
 routes.get('/comentarios/:id', async(req, res) => {
   try {
     const [comentarios] = await promisePool.query('SELECT * FROM comentarios_evento WHERE id_evento = ?', [req.params.id]);
+    
+    // Ordenamos los comentarios por fecha
+    comentarios.sort((a, b) => {
+      return new Date(b.fecha) - new Date(a.fecha);
+    });
+
     res.status(200).json(comentarios);
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
