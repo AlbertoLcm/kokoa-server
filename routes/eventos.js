@@ -165,7 +165,7 @@ routes.post('/asistente/check', async (req, res) => {
 // Ruta para mostrar los comentarios de un evento, recibe el id del evento
 routes.get('/comentarios/:id', async(req, res) => {
   try {
-    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_evento WHERE id_evento = ?', [req.params.id]);
+    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_evento JOIN usuarios ON comentarios_evento.id_usuario = usuarios.id WHERE id_evento = ?', [req.params.id]);
     
     // Ordenamos los comentarios por fecha
     comentarios.sort((a, b) => {
