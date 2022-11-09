@@ -42,7 +42,7 @@ routes.put('/:id', async(req, res) => {
 // Ruta para mostrar los comentarios de un negocio, recibe el id del negocio
 routes.get('/comentarios/:id', async(req, res) => {
   try {
-    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_negocio JOIN usuarios ON comentarios_negocio.id_usuario = usuarios.id WHERE id_evento = ?', [req.params.id]);
+    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_negocio JOIN usuarios ON comentarios_negocio.id_usuario = usuarios.id WHERE id_negocio = ?', [req.params.id]);
 
     // ordenamos los comentarios por fecha
     comentarios.sort((a, b) => {
