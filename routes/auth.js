@@ -155,7 +155,7 @@ routes.post("/", isAuthenticated, async (req, res) => {
   const verify = await jwt.verify(token, process.env.SECRET_KEY);
 
   try {
-    if(verify.role !== "usuarios") {
+    if(verify.role) {
       const [userCargo] = await promisePool.query(`SELECT * FROM ${verify.rol} WHERE id = ?`, [verify.id]);
       const [userGeneral] = await promisePool.query("SELECT * FROM usuarios WHERE id = ?", [userCargo[0].propietario]);
 
