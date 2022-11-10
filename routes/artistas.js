@@ -37,4 +37,14 @@ routes.put('/:id', async(req, res) => {
   }
 });
 
+// Ruta para búscar artistas por el tipo
+routes.post('/tipo', async(req, res) => {
+  try {
+    const [artistas] = await promisePool.query('SELECT * FROM artistas WHERE tipo = ?', [req.body.tipo]);
+    res.status(200).json(artistas);
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error });
+  }
+});
+
 module.exports = routes;

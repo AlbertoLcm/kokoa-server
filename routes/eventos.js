@@ -76,7 +76,7 @@ routes.get('/', async (req, res) => {
   }
 })
 
-// Ruta para mostrar todos los eventos de un NEGOCIO, recibe el id del usuario 
+// Ruta para mostrar todos los eventos de un NEGOCIO, recibe el id del negocio
 routes.get('/all/:id', async (req, res) => {
   try {
     const [eventos] = await promisePool.query('SELECT * FROM eventos WHERE anfitrion = ? AND rol_anfitrion = "negocios"', [req.params.id])
