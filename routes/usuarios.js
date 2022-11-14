@@ -3,6 +3,7 @@ const routes = express.Router()
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const promisePool = require('../database/dbPromise')
+const transporter = require('../helpers/configEmail')
 
 // ======= Ruta para registrar un usuario =======
 routes.post('/signup', async (req, res) => {
@@ -89,6 +90,70 @@ routes.put('/:id', async(req, res) => {
     await promisePool.query('UPDATE usuarios SET ? WHERE id = ?', [req.body, req.params.id]);
   } catch (error) {
     res.status(400).json({message: 'Algo salio mal', error: error})
+  }
+});
+
+// Ruta para recuperar la contraseña
+routes.post('/recuperar', async (req, res) => {
+  const {email} = req.body
+  // Paso 1 - Verificamos que ingresen todos los datos
+  if (!email) {
+    return res.status(400).json({ message: 'Debes ingresar un correo o teléfono' })
+  }
+  try {
+    // Paso 2 - Verificamos si el correo existe
+    const [usuario] = await promisePool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+    if (!usuario.length) {
+      return res.status(400).json({ message: 'El usuario no existe' })
+    }
+
+    // Paso 3 - Creamos un token con el usuario
+    const token = await jwt.sign({id: usuario[0].id}, process.env.SECRET_KEY, {expiresIn: "10m"});
+
+    // Paso 4 - Enviamos el correo
+    await transporter.sendMail({
+      from: '"Kokoa" <kokoafast@gmail.com>',
+      to: ` ${email} `, 
+      subject: 'Recupera tu contraseña',
+      text: `https://kokoa.vercel.app/resetpassword/${usuario[0].id}/${token}`
+    });
+    
+    return res.status(200).json({ message: 'Se ha enviado un email a tu correo' })
+
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error });
+  }
+});
+
+// Ruta para resetear la contraseña
+routes.post('/resetpassword/:id/:token', async (req, res) => {
+  const {password} = req.body;
+  const {id, token} = req.params;
+  // Paso 1 - Verificamos que ingresen todos los datos
+  if (!id || !token) {
+    return res.status(400).json({ message: 'Acceso Denegado' })
+  }
+  if (!password) {
+    return res.status(400).json({ message: 'Debes ingresar una contraseña' })
+  }
+  try {
+    // Paso 2 - Verificamos si el token es valido
+    const decoded = await jwt.verify(req.params.token, process.env.SECRET_KEY);
+    if (!decoded) {
+      return res.status(400).json({ message: 'El token es invalido' })
+    }
+    // Paso 3 - Hasheamos la contraseña
+    const salt = await bcrypt.genSalt(10)
+    const hashPassword = await bcrypt.hash(req.body.password, salt)
+    req.body.password = hashPassword
+
+    // Paso 4 - Actualizamos la contraseña
+    await promisePool.query('UPDATE usuarios SET password = ? WHERE id = ?', [req.body.password, req.params.id]);
+
+    return res.status(200).json({ message: 'Se ha actualizado la contraseña' })
+
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error });
   }
 });
 

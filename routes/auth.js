@@ -44,6 +44,39 @@ routes.post("/login", async (req, res) => {
 });
 // ======= Fin ruta para hacer login a un usuario =======
 
+// ======= Ruta para hacer login en reset password =======
+routes.post("/resetpassword", async (req, res) => {
+  try {
+    const { id } = req.body;
+    // Paso 1 - Verificamos que ingresen datos
+    if (!id) {
+      return res.status(400).json({ message: "Debes ingresar todos los datos" });
+    }
+    // Paso 2 - Verificamos si el usuario existe
+    const [user] = await promisePool.query("SELECT * FROM usuarios WHERE id", [id]);
+    if (!user.length) {
+      return res.status(400).json({ message: "El usuario no exite" });
+    }
+    // Paso 3 - Creamos el token
+    const token = await jwt.sign({
+      id: user[0].id
+    }, process.env.SECRET_KEY, { expiresIn: process.env.JWT_EXPIRE });
+
+    return res.cookie("token", token).json({
+      success: true,
+      message: "Ingresado correctamente",
+      user: {
+        token: token,
+        data: user[0]
+      }
+    });
+
+  } catch (error) {
+    return res.status(400).json({ error: error });
+  };
+});
+// ======= FIN Ruta para hacer login en reset password =======
+
 // ======= Ruta para hacer login a un cargo del usuario =======
 routes.post("/login/cargo", async (req, res) => {
   try {
@@ -95,26 +128,22 @@ routes.post("/login/back", async (req, res) => {
   if (!id) {
     return res.status(400).json({ message: "Debes ingresar todos los datos" });
   }
-  // Paso 2 - Buscamos el usuario
-  const [user] = await promisePool.query("SELECT * FROM usuarios WHERE id = ?", [id]);
-
-  const token = await jwt.sign({
-    id: user[0].id
-  }, process.env.SECRET_KEY, { expiresIn: process.env.JWT_EXPIRE });
-
-  return res.cookie("token", token).json({
-    success: true,
-    message: "Ingresado correctamente",
-    user: {
-      token: token,
-      data: user[0]
-    }
-  });
-  
   try {
+    // Paso 2 - Buscamos el usuario
+    const [user] = await promisePool.query("SELECT * FROM usuarios WHERE id = ?", [id]);
 
-    
-    
+    const token = await jwt.sign({
+      id: user[0].id
+    }, process.env.SECRET_KEY, { expiresIn: process.env.JWT_EXPIRE });
+
+    return res.cookie("token", token).json({
+      success: true,
+      message: "Ingresado correctamente",
+      user: {
+        token: token,
+        data: user[0]
+      }
+    });
   } catch (error) {
     res.status(400).json({ message: "Algo salio mal", error: error });
   }
