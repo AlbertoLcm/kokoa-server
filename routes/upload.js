@@ -2,6 +2,7 @@ const express = require('express');
 const routes = express.Router();
 const multer = require('multer');
 const fs = require("fs");
+const fsPromise = require('fs').promises
 const promisePool = require('../database/dbPromise');
 
 const storage = multer.diskStorage({
@@ -13,6 +14,17 @@ const storage = multer.diskStorage({
     const nomImg = `${Date.now()}.${ext}`;
     const nombreCompleto = `https://koko-server.fly.dev/api/upload/${nomImg}`;
     await promisePool.query('UPDATE usuarios SET ? WHERE id = ?', [{ perfil: nombreCompleto }, req.body.id]);
+    
+    // Eliminamos la imagen anterior
+    const nombre = req.body.anterior.split('/').pop();
+    if(nombre !== 'user.jpg'){
+      fsPromise.unlink(`./images/${nombre}`)
+      .then(() => {
+      }).catch(err => {
+        console.log(err)
+      })
+    }
+    
     callback(null, nomImg);
   }
 });
