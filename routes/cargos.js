@@ -11,8 +11,11 @@ routes.post('/negocio', async(req, res) => {
     await promisePool.query('INSERT INTO negocios SET ?', [{
       nombre: req.body.negocio.nombre,
       direccion: req.body.direccion,
+      email: req.body.negocio.email,
+      numero: req.body.negocio.telefono,
       horario: horario,
-      propietario: req.body.id
+      propietario: req.body.id,
+      descripcion: req.body.negocio.descripcion,
     }]);
     res.status(200).json({ message: "Negocio creado correctamente" });
   } catch (error) {

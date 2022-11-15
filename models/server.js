@@ -5,14 +5,21 @@ const mysql = require('mysql2');
 const myConnection = require('express-myconnection');
 const dbOptions = require('../database/db.js');
 
-class Server {
+
+class ServerClass {
   constructor() {
     this.app = express();
     this.port = process.env.PORT;
+    this.server = require("http").Server(this.app);
+    this.io = require("socket.io")(this.server);
     this.middlewares();
     this.routes();
+    this.io.on("connection", function (socket) {
+      console.log("Un cliente se ha conectado");
+      socket.emit("messages", messages);
+    });
   }
-
+  
   async middlewares() {
     this.app.use(myConnection(mysql, dbOptions, 'request'));
     this.app.use(cors());
@@ -40,4 +47,4 @@ class Server {
   }
 }
 
-module.exports = Server;
+module.exports = ServerClass;

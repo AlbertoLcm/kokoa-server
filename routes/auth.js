@@ -110,6 +110,8 @@ routes.post("/login/cargo", async (req, res) => {
           nombre_cargo: userCargo[0].nombre,
           direccion_cargo: userCargo[0].direccion,
           horario_cargo: userCargo[0].horario,
+          perfil: userCargo[0].perfil,
+          portada: userCargo[0].portada,
         }
       }
     });
@@ -184,8 +186,8 @@ routes.post("/", isAuthenticated, async (req, res) => {
   const verify = await jwt.verify(token, process.env.SECRET_KEY);
 
   try {
-    if(verify.role) {
-      const [userCargo] = await promisePool.query(`SELECT * FROM ${verify.rol} WHERE id = ?`, [verify.id]);
+    if(verify.rol) {
+      const [userCargo] = await promisePool.query(`SELECT * FROM ${verify.rol} WHERE id = ?`, [verify.id_cargo]);
       const [userGeneral] = await promisePool.query("SELECT * FROM usuarios WHERE id = ?", [userCargo[0].propietario]);
 
       return res.status(200).json({
@@ -206,6 +208,7 @@ routes.post("/", isAuthenticated, async (req, res) => {
             nombre_cargo: userCargo[0].nombre,
             direccion_cargo: userCargo[0].direccion,
             horario_cargo: userCargo[0].horario,
+            perfil: userCargo[0].perfil,
           }
         }
       });

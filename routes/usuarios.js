@@ -88,6 +88,8 @@ routes.put('/:id', async(req, res) => {
 
   try {
     await promisePool.query('UPDATE usuarios SET ? WHERE id = ?', [req.body, req.params.id]);
+    res.json({ message: 'Usuario actualizado' })
+    
   } catch (error) {
     res.status(400).json({message: 'Algo salio mal', error: error})
   }
