@@ -12,4 +12,25 @@ routes.get('/:emisor/:rol_e/:receptor/:rol_r', async (req, res) => {
   }
 });
 
+// Ruta para mostrar los chats, recibe id del usuario y el rol del usuario
+routes.get('/chats/:id/:rol', async (req, res) => {
+  try {
+    const [chats] = await promisePool.query('SELECT * FROM chats WHERE propietario = ? AND propietario_rol = ?', [req.params.id, req.params.rol]);
+    res.status(200).json(chats);
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error });
+  }
+});
+
+// Ruta para crear un chat
+routes.post('/chats', async (req, res) => {
+  try {
+    const [chats] = await promisePool.query('INSERT INTO chats SET ?', [req.body]);
+    res.status(200).json(chats);
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error });
+  }
+});
+
+
 module.exports = routes;
