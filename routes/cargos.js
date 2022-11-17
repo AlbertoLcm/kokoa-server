@@ -75,7 +75,10 @@ routes.post('/patrocinador', async(req, res) => {
       nombre: req.body.patrocinador.nombre,
       direccion: req.body.direccion,
       descripcion: req.body.patrocinador.descripcion,
-      propietario: req.body.id
+      propietario: req.body.id,
+      tipo: req.body.patrocinador.tipo,
+      email: req.body.patrocinador.email,
+      numero: req.body.patrocinador.telefono
     }]);
     res.status(200).json({ message: "Negocio creado correctamente" });
   } catch (error) {
