@@ -20,7 +20,12 @@ class ServerClass {
       }
     });
     this.io.on("connection", (socket) => {
+      socket.on("comentar", async (data) => {
+        this.io.emit("new-comentario", data);
+      });
       socket.on('send-message', async (mensaje) => {
+        this.io.sockets.emit(`new-from-${mensaje.emisor}-to-${mensaje.receptor.id}-${mensaje.receptor.rol}`, mensaje.mensaje);
+        
         await promisePool.query('INSERT INTO mensajes SET ?', [{
           mensaje: mensaje.mensaje,
           fecha: new Date(),
@@ -30,9 +35,6 @@ class ServerClass {
           receptor: mensaje.receptor.id,
           receptor_rol: mensaje.receptor.rol,
         }]);
-
-        this.io.sockets.emit(`new-from-${mensaje.emisor}-to-${mensaje.receptor.id}-${mensaje.receptor.rol}`, mensaje.mensaje);
-
         await promisePool.query('INSERT INTO mensajes SET ?', [{
           mensaje: mensaje.mensaje,
           fecha: new Date(),

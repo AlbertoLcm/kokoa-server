@@ -41,6 +41,11 @@ routes.put('/:id', async(req, res) => {
 routes.post('/tipo', async(req, res) => {
   try {
     const [patrocinadores] = await promisePool.query('SELECT * FROM patrocinadores WHERE tipo = ?', [req.body.tipo]);
+
+    if (!patrocinadores.length) {
+      return res.status(400).json({ message: 'No se encontraron patrocinadores con ese tipo' });
+    }
+    
     res.status(200).json(patrocinadores);
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });

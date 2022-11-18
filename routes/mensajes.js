@@ -16,7 +16,9 @@ routes.get('/:emisor/:rol_e/:receptor/:rol_r', async (req, res) => {
 routes.get('/chats/:id/:rol', async (req, res) => {
   try {
     const [chats] = await promisePool.query('SELECT * FROM chats WHERE propietario = ? AND propietario_rol = ?', [req.params.id, req.params.rol]);
+    
     res.status(200).json(chats);
+
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
   }
@@ -25,8 +27,8 @@ routes.get('/chats/:id/:rol', async (req, res) => {
 // Ruta para crear un chat
 routes.post('/chats', async (req, res) => {
   try {
-    const [chats] = await promisePool.query('INSERT INTO chats SET ?', [req.body]);
-    res.status(200).json(chats);
+    await promisePool.query('INSERT INTO chats SET ?', [req.body]);
+    res.status(200).json({ message: 'Chat creado' });
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
   }

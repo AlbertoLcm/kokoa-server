@@ -41,6 +41,11 @@ routes.put('/:id', async(req, res) => {
 routes.post('/tipo', async(req, res) => {
   try {
     const [artistas] = await promisePool.query('SELECT * FROM artistas WHERE tipo = ?', [req.body.tipo]);
+    
+    if (!artistas.length) {
+      return res.status(400).json({ message: 'No se encontraron artistas con ese tipo' });
+    }
+    
     res.status(200).json(artistas);
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
