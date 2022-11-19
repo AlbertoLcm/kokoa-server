@@ -29,7 +29,7 @@ routes.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'El telefono ya existe' })
     }
     // Paso 4 - Insertamos el usuario
-    const [insert] = await promisePool.query('INSERT INTO usuarios SET ?', [{
+    await promisePool.query('INSERT INTO usuarios SET ?', [{
       nombre: nombre.trim(),
       apellidos: apellidos.trim(),
       email: email.trim(),
@@ -37,22 +37,21 @@ routes.post('/signup', async (req, res) => {
       password: req.body.password
     }]);
     // Paso 5 - Creamos el token con el usuario ingresado
-    const [user] = await promisePool.query('SELECT * FROM usuarios WHERE id = ?', [insert.insertId]);
+    const [user] = await promisePool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
 
     const token = await jwt.sign({
-      id: user.id
-    }, process.env.SECRET_KEY, {
-      expiresIn: process.env.JWT_EXPIRE
-    },)
+      id: user[0].id
+    }, process.env.SECRET_KEY, { expiresIn: process.env.JWT_EXPIRE });
 
-    return res.cookie('token', token).json({
+    return res.cookie("token", token).json({
       success: true,
-      message: 'Usuario registrado',
+      message: "Registrado correctamente",
       user: {
         token: token,
         data: user[0]
       }
     });
+
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error })
   }

@@ -162,7 +162,7 @@ routes.put("/logout", isAuthenticated, (req, res) => {
       res.clearCookie("token");
       res.status(200).send({ msg: "Has sido desconectado" });
     } else {
-      res.status(400).send({ msg: "Error" });
+      res.status(400).send({ msg: "Error", error: err });
     }
   });
 });

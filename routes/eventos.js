@@ -192,7 +192,7 @@ routes.post('/comentarios', async(req, res) => {
       id_evento: id_evento,
       id_usuario: id_usuario,
       comentario: comentario,
-      fecha: req.body.fecha
+      fecha: new Date()
     }]);
     res.status(200).json({ message: 'Comentario añadido' });
   } catch (error) {
