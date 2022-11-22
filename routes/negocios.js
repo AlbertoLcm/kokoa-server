@@ -1,7 +1,5 @@
 const express = require('express');
 const routes = express.Router();
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const promisePool = require('../database/dbPromise');
 
 routes.get('/', async(req, res) => {
@@ -74,7 +72,7 @@ routes.get('/comentarios/eventos/:id', async(req, res) => {
 // Ruta para añadir un comentario a un negocio, recibe el id del negocio y el id del usuario
 routes.post('/comentarios', async(req, res) => {
 
-  const { id_negocio, id_usuario, comentario } = req.body.comentario;
+  const { id_negocio, id_usuario, comentario } = req.body;
 
   if(!id_negocio || !id_usuario || !comentario) {
     return res.status(400).json({ message: 'Faltan datos' });
