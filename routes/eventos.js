@@ -179,8 +179,19 @@ routes.post('/asistente/check', async (req, res) => {
 // Ruta para mostrar los comentarios de un evento, recibe el id del evento
 routes.get('/comentarios/:id', async (req, res) => {
   try {
-    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_evento WHERE id_evento = ? ORDER BY fecha DESC', [req.params.id]);
-    res.status(200).json(comentarios);
+    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_evento JOIN usuarios ON usuarios.id = comentarios_evento.id_usuario WHERE id_evento = ? AND rol_usuario = "usuarios" ORDER BY fecha DESC', [req.params.id]);
+    const [comentariosNegocio] = await promisePool.query('SELECT * FROM comentarios_evento JOIN negocios ON negocios.id = comentarios_evento.id_usuario WHERE id_evento = ? AND rol_usuario = "negocios" ORDER BY fecha DESC', [req.params.id]);
+    const [comentariosPatrocinador] = await promisePool.query('SELECT * FROM comentarios_evento JOIN patrocinadores ON patrocinadores.id = comentarios_evento.id_usuario WHERE id_evento = ? AND rol_usuario = "artistas" ORDER BY fecha DESC', [req.params.id]);
+    const [comentariosArtista] = await promisePool.query('SELECT * FROM comentarios_evento JOIN artistas ON artistas.id = comentarios_evento.id_usuario WHERE id_evento = ? AND rol_usuario = "patrocinadores" ORDER BY fecha DESC', [req.params.id]);
+
+    const comentariosFinal = comentarios.concat(comentariosNegocio, comentariosPatrocinador, comentariosArtista);
+
+    // Ordenamos los comentarios por fecha
+    comentariosFinal.sort((a, b) => {
+      return new Date(b.fecha) - new Date(a.fecha);
+    });
+    
+    res.status(200).json(comentariosFinal);
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
   }

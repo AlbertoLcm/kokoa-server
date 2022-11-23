@@ -40,14 +40,19 @@ routes.put('/:id', async(req, res) => {
 // Ruta para mostrar los comentarios de un negocio, recibe el id del negocio
 routes.get('/comentarios/:id', async(req, res) => {
   try {
-    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_negocio WHERE id_negocio = ?', [req.params.id]);
+    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_negocio JOIN usuarios ON usuarios.id = comentarios_negocio.id_usuario WHERE id_negocio = ? AND rol_usuario = "usuarios" ORDER BY fecha DESC', [req.params.id]);
+    const [comentariosNegocios] = await promisePool.query('SELECT * FROM comentarios_negocio JOIN negocios ON negocios.id = comentarios_negocio.id_usuario WHERE id_negocio = ? AND rol_usuario = "negocios" ORDER BY fecha DESC', [req.params.id]);
+    const [comentariosPatrocinadores] = await promisePool.query('SELECT * FROM comentarios_negocio JOIN patrocinadores ON patrocinadores.id = comentarios_negocio.id_usuario WHERE id_negocio = ? AND rol_usuario = "patrocinadores" ORDER BY fecha DESC', [req.params.id]);
+    const [comentariosArtistas] = await promisePool.query('SELECT * FROM comentarios_negocio JOIN artistas ON artistas.id = comentarios_negocio.id_usuario WHERE id_negocio = ? AND rol_usuario = "artistas" ORDER BY fecha DESC', [req.params.id]);
 
+    const comentariosFinales = [...comentarios, ...comentariosNegocios, ...comentariosPatrocinadores, ...comentariosArtistas];
+    
     // ordenamos los comentarios por fecha
-    comentarios.sort((a, b) => {
+    comentariosFinales.sort((a, b) => {
       return new Date(b.fecha) - new Date(a.fecha);
     });
-      
-    res.status(200).json(comentarios);
+
+    res.status(200).json(comentariosFinales);
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
   }
@@ -56,8 +61,17 @@ routes.get('/comentarios/:id', async(req, res) => {
 // Ruta para mostrar los COMENTARIOS DE LOS EVENTOS de un negocio, recibe el id del negocio
 routes.get('/comentarios/eventos/:id', async(req, res) => {
   try {
-    const [comentarios] = await promisePool.query('SELECT * FROM eventos JOIN comentarios_evento ON comentarios_evento.id_evento = eventos.id_evento WHERE eventos.rol_anfitrion = "negocios" AND eventos.anfitrion = ? ORDER BY fecha DESC', [req.params.id]);
-    res.status(200).json(comentarios);
+    const [comentarios] = await promisePool.query('SELECT * FROM eventos JOIN comentarios_evento JOIN usuarios ON comentarios_evento.id_evento = eventos.id_evento AND comentarios_evento.id_usuario = usuarios.id AND comentarios_evento.rol_usuario = "usuarios" WHERE eventos.rol_anfitrion = "negocios" AND eventos.anfitrion = ? ORDER BY fecha DESC', [req.params.id]);
+    const [comentariosNegocio] = await promisePool.query('SELECT * FROM eventos JOIN comentarios_evento JOIN negocios ON comentarios_evento.id_evento = eventos.id_evento AND comentarios_evento.id_usuario = negocios.id AND comentarios_evento.rol_usuario = "negocios" WHERE eventos.rol_anfitrion = "negocios" AND eventos.anfitrion = ? ORDER BY fecha DESC', [req.params.id]);
+
+    const comentariosFinales = [...comentarios, ...comentariosNegocio];
+
+    // ordeno los comentarios por fecha
+    comentariosFinales.sort((a, b) => {
+      return new Date(b.fecha) - new Date(a.fecha);
+    });
+    
+    res.status(200).json(comentariosFinales);
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
   }
@@ -67,7 +81,6 @@ routes.get('/comentarios/eventos/:id', async(req, res) => {
 routes.post('/comentarios', async(req, res) => {
 
   const { id_negocio, id_usuario, comentario } = req.body;
-
   if(!id_negocio || !id_usuario || !comentario) {
     return res.status(400).json({ message: 'Faltan datos' });
   }
@@ -76,9 +89,8 @@ routes.post('/comentarios', async(req, res) => {
     await promisePool.query('INSERT INTO comentarios_negocio SET ?', [{
       id_negocio: id_negocio,
       id_usuario: id_usuario,
-      perfil: req.body.perfil,
-      nombre: req.body.nombre,
       comentario: comentario,
+      rol_usuario: req.body.rol_usuario,
       fecha: new Date()
     }]);
 
