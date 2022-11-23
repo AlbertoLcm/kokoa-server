@@ -12,7 +12,10 @@ routes.post('/add', async (req, res) => {
   let fechaTermino = req.body.datosEvento.fechaTermino;
   let horaTermino = req.body.datosEvento.horaTermino;
   const descripcion = req.body.datosEvento.descripcion;
-  
+  let costo = req.body.datosEvento.costo;
+
+  costo ? costo : costo = 0;
+
   // Verificamos que ingresen todos los datos
   if (!lat || !lng || !nombre, !fechaInicio || !horaIncio || !fechaTermino || !horaTermino || !descripcion) {
     return res.status(400).json({ message: 'Debes ingresar todos los datos' })
@@ -33,13 +36,14 @@ routes.post('/add', async (req, res) => {
       rol_anfitrion: req.body.rol,
       anfitrion: id,
       capacidad: req.body.datosEvento.capacidad,
-      precio: req.body.datosEvento.costo,
+      precio: costo,
       descripcion: req.body.datosEvento.descripcion,
       tipo: req.body.datosEvento.tipo,
+      publico: req.body.datosEvento.publico,
     }]);
 
     // TODO: Arreglar servidor de correo
-    
+
     // // enviar correo a todos los usuarios
     // const [usuarios] = await promisePool.query('SELECT * FROM usuarios');
     // let emails = usuarios.map(usuario => {
@@ -69,10 +73,20 @@ routes.post('/add', async (req, res) => {
 // Ruta para mostrar todos los eventos en general
 routes.get('/', async (req, res) => {
   try {
-    const [eventosBD] = await promisePool.query('SELECT * FROM eventos')
-    res.status(200).json(eventosBD)
+    // Obtenemos todos los eventos que ya terminaron
+    const [eventosConluidos] = await promisePool.query('SELECT * FROM eventos WHERE fecha_termino < NOW() AND rol_anfitrion = "usuarios"');
+
+    // Borramos los eventos que ya terminaron
+    eventosConluidos.forEach(async evento => {
+      await promisePool.query('DELETE FROM eventos WHERE id_evento = ?', [evento.id_evento]);
+    });
+
+    // Solo mandamos los eventos que no hayan terminado
+    const [eventos] = await promisePool.query('SELECT * FROM eventos WHERE fecha_termino > NOW() AND publico = 1');
+    return res.status(200).json(eventos)
+
   } catch (error) {
-    return res.status(400).json({ message: 'Algo salio mal', error: errBD })
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
   }
 })
 
@@ -114,14 +128,14 @@ routes.get('/evento/:id', async (req, res) => {
 routes.post('/asistente', async (req, res) => {
   const { id_evento, id_usuario } = req.body;
 
-  if(!id_evento || !id_usuario) {
+  if (!id_evento || !id_usuario) {
     return res.status(400).json({ message: 'Se necesita el id del evento y usuario' })
   }
-  
+
   try {
     await promisePool.query('INSERT INTO asistentes SET ?', [req.body]);
     const [data] = await promisePool.query('UPDATE eventos SET asistentes_cont = asistentes_cont + 1 WHERE id_evento = ?', [id_evento]);
-    
+
     return res.status(201).json({ message: 'Asistente agregado', inf: data })
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error })
@@ -132,14 +146,14 @@ routes.post('/asistente', async (req, res) => {
 routes.post('/ausentar', async (req, res) => {
   const { id_evento, id_usuario } = req.body;
 
-  if(!id_evento || !id_usuario) {
+  if (!id_evento || !id_usuario) {
     return res.status(400).json({ message: 'Se necesita el id del evento y usuario' })
   }
-  
+
   try {
     await promisePool.query('DELETE FROM asistentes WHERE id_usuario = ? AND id_evento = ?', [id_usuario, id_evento]);
     const [data] = await promisePool.query('UPDATE eventos SET asistentes_cont = asistentes_cont - 1 WHERE id_evento = ?', [id_evento]);
-    
+
     return res.status(201).json({ message: 'Asistente agregado', inf: data })
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error })
@@ -150,10 +164,10 @@ routes.post('/ausentar', async (req, res) => {
 routes.post('/asistente/check', async (req, res) => {
   const { id_usuario } = req.body;
 
-  if(!id_usuario) {
+  if (!id_usuario) {
     return res.status(400).json({ message: 'Se necesita el id del usuario' })
   }
-  
+
   try {
     const [data] = await promisePool.query('SELECT * FROM asistentes WHERE id_usuario = ?', [id_usuario]);
     return res.status(200).json(data)
@@ -163,15 +177,9 @@ routes.post('/asistente/check', async (req, res) => {
 });
 
 // Ruta para mostrar los comentarios de un evento, recibe el id del evento
-routes.get('/comentarios/:id', async(req, res) => {
+routes.get('/comentarios/:id', async (req, res) => {
   try {
-    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_evento JOIN usuarios ON comentarios_evento.id_usuario = usuarios.id WHERE id_evento = ?', [req.params.id]);
-    
-    // Ordenamos los comentarios por fecha
-    comentarios.sort((a, b) => {
-      return new Date(b.fecha) - new Date(a.fecha);
-    });
-
+    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_evento JOIN usuarios ON comentarios_evento.id_usuario = usuarios.id WHERE id_evento = ? ORDER BY fecha DESC', [req.params.id]);
     res.status(200).json(comentarios);
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
@@ -179,14 +187,14 @@ routes.get('/comentarios/:id', async(req, res) => {
 });
 
 // Ruta para añadir un comentario a un negocio, recibe el id del negocio y el id del usuario
-routes.post('/comentarios', async(req, res) => {
+routes.post('/comentarios', async (req, res) => {
 
   const { id_evento, id_usuario, comentario } = req.body;
 
-  if(!id_evento || !id_usuario || !comentario) {
+  if (!id_evento || !id_usuario || !comentario) {
     return res.status(400).json({ message: 'Faltan datos' });
   }
-  
+
   try {
     await promisePool.query('INSERT INTO comentarios_evento SET ?', [{
       id_evento: id_evento,

@@ -56,13 +56,7 @@ routes.get('/comentarios/:id', async(req, res) => {
 // Ruta para mostrar los COMENTARIOS DE LOS EVENTOS de un negocio, recibe el id del negocio
 routes.get('/comentarios/eventos/:id', async(req, res) => {
   try {
-    const [comentarios] = await promisePool.query('SELECT * FROM eventos JOIN comentarios_evento JOIN usuarios ON comentarios_evento.id_evento = eventos.id_evento AND usuarios.id = comentarios_evento.id_usuario WHERE eventos.rol_anfitrion = "negocios" AND eventos.anfitrion = ?', [req.params.id]);
-
-    // ordenamos los comentarios por fecha
-    comentarios.sort((a, b) => {
-      return new Date(b.fecha) - new Date(a.fecha);
-    });
-      
+    const [comentarios] = await promisePool.query('SELECT * FROM eventos JOIN comentarios_evento JOIN usuarios ON comentarios_evento.id_evento = eventos.id_evento AND usuarios.id = comentarios_evento.id_usuario WHERE eventos.rol_anfitrion = "negocios" AND eventos.anfitrion = ? ORDER BY fecha DESC', [req.params.id]);
     res.status(200).json(comentarios);
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
