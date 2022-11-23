@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
     const ext = file.originalname.split('.').pop();
     const nomImg = `${Date.now()}.${ext}`;
     const nombreCompleto = `https://koko-server.fly.dev/api/upload/${nomImg}`;
-    await promisePool.query('UPDATE usuarios SET ? WHERE id = ?', [{ perfil: nombreCompleto }, req.body.id]);
+    await promisePool.query(`UPDATE ${req.body.rol} SET ? WHERE id = ?`, [{ perfil: nombreCompleto }, req.body.id]);
     
     // Eliminamos la imagen anterior
     const nombre = req.body.anterior.split('/').pop();
