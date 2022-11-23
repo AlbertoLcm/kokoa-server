@@ -40,7 +40,7 @@ routes.put('/:id', async(req, res) => {
 // Ruta para mostrar los comentarios de un negocio, recibe el id del negocio
 routes.get('/comentarios/:id', async(req, res) => {
   try {
-    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_negocio JOIN usuarios ON comentarios_negocio.id_usuario = usuarios.id WHERE id_negocio = ?', [req.params.id]);
+    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_negocio WHERE id_negocio = ?', [req.params.id]);
 
     // ordenamos los comentarios por fecha
     comentarios.sort((a, b) => {
@@ -56,7 +56,7 @@ routes.get('/comentarios/:id', async(req, res) => {
 // Ruta para mostrar los COMENTARIOS DE LOS EVENTOS de un negocio, recibe el id del negocio
 routes.get('/comentarios/eventos/:id', async(req, res) => {
   try {
-    const [comentarios] = await promisePool.query('SELECT * FROM eventos JOIN comentarios_evento JOIN usuarios ON comentarios_evento.id_evento = eventos.id_evento AND usuarios.id = comentarios_evento.id_usuario WHERE eventos.rol_anfitrion = "negocios" AND eventos.anfitrion = ? ORDER BY fecha DESC', [req.params.id]);
+    const [comentarios] = await promisePool.query('SELECT * FROM eventos JOIN comentarios_evento ON comentarios_evento.id_evento = eventos.id_evento WHERE eventos.rol_anfitrion = "negocios" AND eventos.anfitrion = ? ORDER BY fecha DESC', [req.params.id]);
     res.status(200).json(comentarios);
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
@@ -76,6 +76,8 @@ routes.post('/comentarios', async(req, res) => {
     await promisePool.query('INSERT INTO comentarios_negocio SET ?', [{
       id_negocio: id_negocio,
       id_usuario: id_usuario,
+      perfil: req.body.perfil,
+      nombre: req.body.nombre,
       comentario: comentario,
       fecha: new Date()
     }]);

@@ -179,7 +179,7 @@ routes.post('/asistente/check', async (req, res) => {
 // Ruta para mostrar los comentarios de un evento, recibe el id del evento
 routes.get('/comentarios/:id', async (req, res) => {
   try {
-    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_evento JOIN usuarios ON comentarios_evento.id_usuario = usuarios.id WHERE id_evento = ? ORDER BY fecha DESC', [req.params.id]);
+    const [comentarios] = await promisePool.query('SELECT * FROM comentarios_evento WHERE id_evento = ? ORDER BY fecha DESC', [req.params.id]);
     res.status(200).json(comentarios);
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
@@ -199,6 +199,8 @@ routes.post('/comentarios', async (req, res) => {
     await promisePool.query('INSERT INTO comentarios_evento SET ?', [{
       id_evento: id_evento,
       id_usuario: id_usuario,
+      perfil: req.body.perfil,
+      nombre: req.body.nombre,
       comentario: comentario,
       fecha: new Date()
     }]);
