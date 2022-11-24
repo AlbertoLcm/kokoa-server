@@ -210,9 +210,8 @@ routes.post('/comentarios', async (req, res) => {
     await promisePool.query('INSERT INTO comentarios_evento SET ?', [{
       id_evento: id_evento,
       id_usuario: id_usuario,
-      perfil: req.body.perfil,
-      nombre: req.body.nombre,
       comentario: comentario,
+      rol_usuario: req.body.rol_usuario,
       fecha: new Date()
     }]);
     res.status(200).json({ message: 'Comentario añadido' });

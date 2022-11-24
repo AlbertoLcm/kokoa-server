@@ -49,16 +49,43 @@ routes.get('/', (req, res) => {
   res.status(200).json(files);
 });
 
-routes.get('/:imagen', (req, res) => {
+routes.get('/:imagen', async (req, res) => {
 
   // respondemos con la imagen
-  const path = `./images/${req.params.imagen}`;
+  let path = `./images/${req.params.imagen}`;
+  try {
+    let imagen = fs.readFileSync(path);
+    // enviamos la imagen
+    res.writeHead(200, {'Content-Type': 'image/png' });
+    res.end(imagen, 'binary');
+  } catch (error) {
 
-  const imagen = fs.readFileSync(path);
+    // buscamos la imagen ingresada en la base de datos
+    const [usuarios] = await promisePool.query(`SELECT perfil FROM usuarios WHERE perfil LIKE '%${req.params.imagen}%'`)
+    const [negocios] = await promisePool.query(`SELECT perfil FROM negocios WHERE perfil LIKE '%${req.params.imagen}%'`)
+    const [patrocinadores] = await promisePool.query(`SELECT perfil FROM patrocinadores WHERE perfil LIKE '%${req.params.imagen}%'`)
+    const [artistas] = await promisePool.query(`SELECT perfil FROM artistas WHERE perfil LIKE '%${req.params.imagen}%'`)
+
+    if(usuarios.length){
+      await promisePool.query(`UPDATE usuarios SET ? WHERE perfil LIKE '%${req.params.imagen}%'`, [{ perfil: 'https://koko-server.fly.dev/api/upload/user.jpg' }])
+    }
+    if(negocios.length){
+      await promisePool.query(`UPDATE negocios SET ? WHERE perfil LIKE '%${req.params.imagen}%'`, [{ perfil: 'https://koko-server.fly.dev/api/upload/user.jpg' }])
+    }
+    if(patrocinadores.length){
+      await promisePool.query(`UPDATE patrocinadores SET ? WHERE perfil LIKE '%${req.params.imagen}%'`, [{ perfil: 'https://koko-server.fly.dev/api/upload/user.jpg' }])
+    }
+    if(artistas.length){
+      await promisePool.query(`UPDATE artistas SET ? WHERE perfil LIKE '%${req.params.imagen}%'`, [{ perfil: 'https://koko-server.fly.dev/api/upload/user.jpg' }])
+    }
+    
+    const path = `./images/user.jpg`;
+    const imagen = fs.readFileSync(path);
+    // enviamos la imagen
+    res.writeHead(200, {'Content-Type': 'image/png' });
+    res.end(imagen, 'binary');
+  }
   
-  // enviamos la imagen
-  res.writeHead(200, {'Content-Type': 'image/png' });
-  res.end(imagen, 'binary');
   
 });
 

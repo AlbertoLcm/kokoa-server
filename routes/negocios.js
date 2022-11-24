@@ -63,8 +63,10 @@ routes.get('/comentarios/eventos/:id', async(req, res) => {
   try {
     const [comentarios] = await promisePool.query('SELECT * FROM eventos JOIN comentarios_evento JOIN usuarios ON comentarios_evento.id_evento = eventos.id_evento AND comentarios_evento.id_usuario = usuarios.id AND comentarios_evento.rol_usuario = "usuarios" WHERE eventos.rol_anfitrion = "negocios" AND eventos.anfitrion = ? ORDER BY fecha DESC', [req.params.id]);
     const [comentariosNegocio] = await promisePool.query('SELECT * FROM eventos JOIN comentarios_evento JOIN negocios ON comentarios_evento.id_evento = eventos.id_evento AND comentarios_evento.id_usuario = negocios.id AND comentarios_evento.rol_usuario = "negocios" WHERE eventos.rol_anfitrion = "negocios" AND eventos.anfitrion = ? ORDER BY fecha DESC', [req.params.id]);
+    const [comentariosPatrocinador] = await promisePool.query('SELECT * FROM eventos JOIN comentarios_evento JOIN patrocinadores ON comentarios_evento.id_evento = eventos.id_evento AND comentarios_evento.id_usuario = patrocinadores.id AND comentarios_evento.rol_usuario = "patrocinadores" WHERE eventos.rol_anfitrion = "negocios" AND eventos.anfitrion = ? ORDER BY fecha DESC', [req.params.id]);
+    const [comentariosArtista] = await promisePool.query('SELECT * FROM eventos JOIN comentarios_evento JOIN artistas ON comentarios_evento.id_evento = eventos.id_evento AND comentarios_evento.id_usuario = artistas.id AND comentarios_evento.rol_usuario = "artistas" WHERE eventos.rol_anfitrion = "negocios" AND eventos.anfitrion = ? ORDER BY fecha DESC', [req.params.id]);
 
-    const comentariosFinales = [...comentarios, ...comentariosNegocio];
+    const comentariosFinales = [...comentarios, ...comentariosNegocio, ...comentariosPatrocinador, ...comentariosArtista];
 
     // ordeno los comentarios por fecha
     comentariosFinales.sort((a, b) => {
