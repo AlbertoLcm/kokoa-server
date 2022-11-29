@@ -209,6 +209,7 @@ routes.post("/", isAuthenticated, async (req, res) => {
             direccion_cargo: userCargo[0].direccion,
             horario_cargo: userCargo[0].horario,
             perfil: userCargo[0].perfil,
+            portada: userCargo[0].portada,
           }
         }
       });
