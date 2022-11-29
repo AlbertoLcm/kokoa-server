@@ -13,8 +13,11 @@ const storage = multer.diskStorage({
     const ext = file.originalname.split('.').pop();
     const nomImg = `${Date.now()}.${ext}`;
     const nombreCompleto = `https://koko-server.fly.dev/api/upload/${nomImg}`;
-    await promisePool.query(`UPDATE ${req.body.rol} SET ? WHERE id = ?`, [{ perfil: nombreCompleto }, req.body.id]);
-    
+    if(req.body.portada){
+      await promisePool.query(`UPDATE ${req.body.rol} SET ? WHERE id = ?`, [{ portada: nombreCompleto }, req.body.id]);
+    }else{
+      await promisePool.query(`UPDATE ${req.body.rol} SET ? WHERE id = ?`, [{ perfil: nombreCompleto }, req.body.id]);
+    }
     // Eliminamos la imagen anterior
     const nombre = req.body.anterior.split('/').pop();
     if(nombre !== 'user.jpg'){
@@ -23,7 +26,7 @@ const storage = multer.diskStorage({
       }).catch(err => {
         console.log(err)
       })
-    }
+    }   
     
     callback(null, nomImg);
   }
@@ -62,21 +65,21 @@ routes.get('/:imagen', async (req, res) => {
 
     // buscamos la imagen ingresada en la base de datos
     const [usuarios] = await promisePool.query(`SELECT perfil FROM usuarios WHERE perfil LIKE '%${req.params.imagen}%'`)
-    const [negocios] = await promisePool.query(`SELECT perfil FROM negocios WHERE perfil LIKE '%${req.params.imagen}%'`)
-    const [patrocinadores] = await promisePool.query(`SELECT perfil FROM patrocinadores WHERE perfil LIKE '%${req.params.imagen}%'`)
-    const [artistas] = await promisePool.query(`SELECT perfil FROM artistas WHERE perfil LIKE '%${req.params.imagen}%'`)
+    const [negocios] = await promisePool.query(`SELECT perfil FROM negocios WHERE perfil OR portada LIKE '%${req.params.imagen}%'`)
+    const [patrocinadores] = await promisePool.query(`SELECT perfil FROM patrocinadores WHERE perfil OR portada LIKE '%${req.params.imagen}%'`)
+    const [artistas] = await promisePool.query(`SELECT perfil FROM artistas WHERE perfil OR portada LIKE '%${req.params.imagen}%'`)
 
     if(usuarios.length){
       await promisePool.query(`UPDATE usuarios SET ? WHERE perfil LIKE '%${req.params.imagen}%'`, [{ perfil: 'https://koko-server.fly.dev/api/upload/user.jpg' }])
     }
     if(negocios.length){
-      await promisePool.query(`UPDATE negocios SET ? WHERE perfil LIKE '%${req.params.imagen}%'`, [{ perfil: 'https://koko-server.fly.dev/api/upload/user.jpg' }])
+      await promisePool.query(`UPDATE negocios SET ? WHERE perfil LIKE '%${req.params.imagen}%'`, [{ perfil: 'https://koko-server.fly.dev/api/upload/user.jpg', portada: 'https://koko-server.fly.dev/api/upload/user.jpg' }])
     }
     if(patrocinadores.length){
-      await promisePool.query(`UPDATE patrocinadores SET ? WHERE perfil LIKE '%${req.params.imagen}%'`, [{ perfil: 'https://koko-server.fly.dev/api/upload/user.jpg' }])
+      await promisePool.query(`UPDATE patrocinadores SET ? WHERE perfil LIKE '%${req.params.imagen}%'`, [{ perfil: 'https://koko-server.fly.dev/api/upload/user.jpg', portada: 'https://koko-server.fly.dev/api/upload/user.jpg' }])
     }
     if(artistas.length){
-      await promisePool.query(`UPDATE artistas SET ? WHERE perfil LIKE '%${req.params.imagen}%'`, [{ perfil: 'https://koko-server.fly.dev/api/upload/user.jpg' }])
+      await promisePool.query(`UPDATE artistas SET ? WHERE perfil LIKE '%${req.params.imagen}%'`, [{ perfil: 'https://koko-server.fly.dev/api/upload/user.jpg', portada: 'https://koko-server.fly.dev/api/upload/user.jpg' }])
     }
     
     const path = `./images/user.jpg`;
