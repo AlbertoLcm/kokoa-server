@@ -20,9 +20,15 @@ class ServerClass {
       }
     });
     this.io.on("connection", (socket) => {
-      socket.on("comentar", async (data) => {
+      // Cuando un usuario comenta algo
+      socket.on("comentar", (data) => {
         this.io.emit("new-comentario", data);
       });
+      // Cuando se crea un nuevo evento
+      socket.on("evento", (data) => {
+        this.io.emit("new-evento", data);
+      });
+      // Chats
       socket.on('send-message', async (mensaje) => {
         this.io.sockets.emit(`new-from-${mensaje.emisor}-to-${mensaje.receptor.id}-${mensaje.receptor.rol}`, mensaje.mensaje);
         

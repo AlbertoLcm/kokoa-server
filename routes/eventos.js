@@ -26,7 +26,7 @@ routes.post('/add', async (req, res) => {
 
   try {
 
-    await promisePool.query('INSERT INTO eventos SET ?', [{
+    const [insert] = await promisePool.query('INSERT INTO eventos SET ?', [{
       nombre: req.body.datosEvento.nombre,
       direccion: req.body.ubicacion,
       fecha_inicio: fecha_inicio,
@@ -62,7 +62,7 @@ routes.post('/add', async (req, res) => {
     //     `,
     // });
 
-    return res.status(201).json({ message: 'Evento registrado' })
+    return res.status(201).json({ message: 'Evento registrado', insert: insert.insertId });
 
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error })
@@ -72,29 +72,33 @@ routes.post('/add', async (req, res) => {
 
 // Ruta para mostrar todos los eventos en general
 routes.get('/', async (req, res) => {
+  // TODO: La zona horaria es diferente en la base de datos, resto 6 horas para que coincida
   try {
-    // Obtenemos todos los eventos que ya terminaron
-    const [eventosConluidos] = await promisePool.query('SELECT * FROM eventos WHERE fecha_termino < NOW() AND rol_anfitrion = "usuarios"');
-
     // Borramos los eventos que ya terminaron
-    eventosConluidos.forEach(async evento => {
-      await promisePool.query('DELETE FROM eventos WHERE id_evento = ?', [evento.id_evento]);
-    });
-
+    await promisePool.query('DELETE FROM eventos WHERE fecha_termino < DATE_ADD(now(), INTERVAL -6 HOUR) AND rol_anfitrion = "usuarios"');
     // Solo mandamos los eventos que no hayan terminado
-    const [eventos] = await promisePool.query('SELECT * FROM eventos WHERE fecha_termino > NOW() AND publico = 1');
-    return res.status(200).json(eventos)
-
+    const [eventos] = await promisePool.query('SELECT * FROM eventos WHERE fecha_termino > DATE_ADD(now(), INTERVAL -6 HOUR) AND publico = 1');
+    return res.status(200).json(eventos);
   } catch (error) {
-    return res.status(400).json({ message: 'Algo salio mal', error: error })
+    return res.status(400).json({ message: 'Algo salio mal', error: error });
   }
 })
+
+// Ruta para mostrar los eventos que estan en curso
+routes.get('/transcurso', async (req, res) => {
+  try {
+    const [eventos] = await promisePool.query('SELECT * FROM eventos WHERE fecha_inicio < DATE_ADD(now(), INTERVAL -6 HOUR) AND fecha_termino > DATE_ADD(now(), INTERVAL -6 HOUR) AND publico = 1');
+    return res.status(200).json(eventos);
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error });
+  }
+});
 
 // Ruta para mostrar eventos anteriores de un NEGOCIO, recibe el id del negocio
 routes.get('/anteriores/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const [eventosConluidos] = await promisePool.query('SELECT * FROM eventos WHERE fecha_termino < NOW() AND rol_anfitrion = "negocios" AND anfitrion = ?', [id]);
+    const [eventosConluidos] = await promisePool.query('SELECT * FROM eventos WHERE fecha_termino < DATE_ADD(now(), INTERVAL -6 HOUR) AND rol_anfitrion = "negocios" AND anfitrion = ?', [id]);
     res.status(200).json(eventosConluidos)
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error })
@@ -105,7 +109,7 @@ routes.get('/anteriores/:id', async (req, res) => {
 routes.get('/actuales/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const [eventosActuales] = await promisePool.query('SELECT * FROM eventos WHERE fecha_termino > NOW() AND rol_anfitrion = "negocios" AND anfitrion = ?', [id]);
+    const [eventosActuales] = await promisePool.query('SELECT * FROM eventos WHERE fecha_termino > DATE_ADD(now(), INTERVAL -6 HOUR) AND rol_anfitrion = "negocios" AND anfitrion = ?', [id]);
     res.status(200).json(eventosActuales)
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error })

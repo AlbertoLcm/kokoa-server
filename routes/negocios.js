@@ -81,12 +81,10 @@ routes.get('/comentarios/eventos/:id', async(req, res) => {
 
 // Ruta para añadir un comentario a un negocio, recibe el id del negocio y el id del usuario
 routes.post('/comentarios', async(req, res) => {
-
   const { id_negocio, id_usuario, comentario } = req.body;
   if(!id_negocio || !id_usuario || !comentario) {
     return res.status(400).json({ message: 'Faltan datos' });
   }
-  
   try {
     await promisePool.query('INSERT INTO comentarios_negocio SET ?', [{
       id_negocio: id_negocio,
