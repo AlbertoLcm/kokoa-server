@@ -90,6 +90,28 @@ routes.get('/', async (req, res) => {
   }
 })
 
+// Ruta para mostrar eventos anteriores de un NEGOCIO, recibe el id del negocio
+routes.get('/anteriores/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [eventosConluidos] = await promisePool.query('SELECT * FROM eventos WHERE fecha_termino < NOW() AND rol_anfitrion = "negocios" AND anfitrion = ?', [id]);
+    res.status(200).json(eventosConluidos)
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
+  }
+});
+
+// Ruta para mostrar eventos actuales de un NEGOCIO, recibe el id del negocio
+routes.get('/actuales/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [eventosActuales] = await promisePool.query('SELECT * FROM eventos WHERE fecha_termino > NOW() AND rol_anfitrion = "negocios" AND anfitrion = ?', [id]);
+    res.status(200).json(eventosActuales)
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
+  }
+});
+
 // Ruta para mostrar todos los eventos de un NEGOCIO, recibe el id del negocio
 routes.get('/all/:id', async (req, res) => {
   try {
@@ -142,7 +164,7 @@ routes.post('/asistente', async (req, res) => {
   }
 });
 
-// Ruta para agregar asistentes al evento, recibe el id del evento y el id del usuario
+// Ruta para eliminar asistentes al evento, recibe el id del evento y el id del usuario
 routes.post('/ausentar', async (req, res) => {
   const { id_evento, id_usuario } = req.body;
 
@@ -160,16 +182,17 @@ routes.post('/ausentar', async (req, res) => {
   }
 });
 
-// Comprobacion de asistencia, recibe el id del evento y el id del usuario
-routes.post('/asistente/check', async (req, res) => {
-  const { id_usuario } = req.body;
-
-  if (!id_usuario) {
+// Comprobacion de asistencia, recibe el id del usuario
+routes.get('/asistente/check/:id', async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
     return res.status(400).json({ message: 'Se necesita el id del usuario' })
   }
-
   try {
-    const [data] = await promisePool.query('SELECT * FROM asistentes WHERE id_usuario = ?', [id_usuario]);
+    const [data] = await promisePool.query('SELECT * FROM asistentes WHERE id_usuario = ?', [id]);
+    if(!data.length)  {
+      return res.status(200).json({ message: 'No tiene eventos', data: data })
+    }
     return res.status(200).json(data)
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error })

@@ -91,8 +91,6 @@ routes.get('/:imagen', async (req, res) => {
     res.writeHead(200, {'Content-Type': 'image/png' });
     res.end(imagen, 'binary');
   }
-  
-  
 });
 
 module.exports = routes;

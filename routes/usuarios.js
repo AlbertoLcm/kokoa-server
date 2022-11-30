@@ -8,7 +8,7 @@ const transporter = require('../helpers/configEmail')
 // ======= Ruta para registrar un usuario =======
 routes.post('/signup', async (req, res) => {
 
-  const {nombre, apellidos, email, telefono, password} = req.body
+  const {nombre, apellidos, email, password} = req.body
   // Paso 1 - Verificamos que ingresen todos los datos
   if (!nombre || !apellidos || !email || !telefono || !password) {
     return res.status(400).json({ message: 'Debes ingresar todos los datos' })

@@ -35,6 +35,7 @@ class ServerClass {
           receptor: mensaje.receptor.id,
           receptor_rol: mensaje.receptor.rol,
         }]);
+        
         await promisePool.query('INSERT INTO mensajes SET ?', [{
           mensaje: mensaje.mensaje,
           fecha: new Date(),
