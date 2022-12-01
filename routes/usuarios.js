@@ -10,7 +10,7 @@ routes.post('/signup', async (req, res) => {
 
   const {nombre, apellidos, email, password} = req.body
   // Paso 1 - Verificamos que ingresen todos los datos
-  if (!nombre || !apellidos || !email || !telefono || !password) {
+  if (!nombre || !apellidos || !email || !password) {
     return res.status(400).json({ message: 'Debes ingresar todos los datos' })
   }
   // Paso 2 - Hasheamos la contraseña
