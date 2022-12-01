@@ -24,9 +24,12 @@ routes.post('/signup', async (req, res) => {
     if (emailBD.length) {
       return res.status(400).json({ message: 'El correo ya existe' })
     }
-    const [telefonoBD] = await promisePool.query('SELECT * FROM usuarios WHERE telefono = ?', [telefono.trim()]);
-    if (telefonoBD.length) {
-      return res.status(400).json({ message: 'El telefono ya existe' })
+
+    if (telefono) {
+      const [telefonoBD] = await promisePool.query('SELECT * FROM usuarios WHERE telefono = ?', [telefono.trim()]);
+      if (telefonoBD.length) {
+        return res.status(400).json({ message: 'El telefono ya existe' })
+      }
     }
     // Paso 4 - Insertamos el usuario
     await promisePool.query('INSERT INTO usuarios SET ?', [{
