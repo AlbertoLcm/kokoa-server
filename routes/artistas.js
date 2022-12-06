@@ -52,4 +52,34 @@ routes.post('/tipo', async(req, res) => {
   }
 });
 
+// Ruta para mostrar las reacciones de un artista, recibe el id del artista
+routes.get('/reacciones/:id', async(req, res) => {
+  try {
+    const [reacciones] = await promisePool.query('SELECT * FROM reacciones WHERE id_receptor = ? AND rol_receptor = "artistas"', [req.params.id]);
+    res.status(200).json(reacciones);
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error });
+  }
+});
+
+// Ruta para añadir una reaccion a un artista, recibe el id del artista y el id del usuario
+routes.post('/reacciones', async(req, res) => {
+  const { id_negocio, id_usuario, rol_usuario, tipo } = req.body;
+  if(!id_negocio || !id_usuario, !rol_usuario) {
+    return res.status(400).json({ message: 'Faltan datos' });
+  }
+  try {
+    await promisePool.query('INSERT INTO reacciones SET ?', [{
+      id_usuario: id_usuario,
+      rol_usuario: rol_usuario,
+      id_receptor: id_negocio,
+      rol_receptor: 'artistas',
+      tipo: tipo
+    }]);
+    res.status(200).json({ message: 'Reaccion añadida' });
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error });
+  }
+});
+
 module.exports = routes;

@@ -36,7 +36,7 @@ routes.post('/signup', async (req, res) => {
       nombre: nombre.trim(),
       apellidos: apellidos.trim(),
       email: email.trim(),
-      telefono: telefono.trim(),
+      telefono: telefono ? telefono.trim() : null,
       password: req.body.password
     }]);
     // Paso 5 - Creamos el token con el usuario ingresado
