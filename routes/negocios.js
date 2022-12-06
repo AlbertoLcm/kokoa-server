@@ -112,7 +112,7 @@ routes.get('/reacciones/:id', async(req, res) => {
 
 // Ruta para añadir una reaccion a un negocio, recibe el id del negocio y el id del usuario
 routes.post('/reacciones', async(req, res) => {
-  const { id_negocio, id_usuario, rol_usuario, tipo } = req.body;
+  const { id_negocio, id_usuario, rol_usuario, tipo, valuacion } = req.body;
   if(!id_negocio || !id_usuario, !rol_usuario) {
     return res.status(400).json({ message: 'Faltan datos' });
   }
@@ -122,9 +122,26 @@ routes.post('/reacciones', async(req, res) => {
       rol_usuario: rol_usuario,
       id_receptor: id_negocio,
       rol_receptor: 'negocios',
-      tipo: tipo
+      tipo: tipo,
+      valuacion: valuacion
     }]);
     res.status(200).json({ message: 'Reaccion añadida' });
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error });
+  }
+});
+
+//  Ruta para editar una reaccion a un negocio
+routes.put('/reacciones/:id', async(req, res) => {
+  const { id_negocio, id_usuario, rol_usuario, tipo, valuacion } = req.body;
+  if(!id_negocio || !id_usuario, !rol_usuario) {
+    return res.status(400).json({ message: 'Faltan datos' });
+  }
+  try {
+    await promisePool.query('UPDATE reacciones SET ? WHERE id_usuario = ? AND rol_usuario = ? AND id_receptor = ? AND rol_receptor = ? AND tipo = ?', [{
+      valuacion: valuacion
+    }, id_usuario, rol_usuario, id_negocio, 'negocios', tipo]);
+    res.status(200).json({ message: 'Reaccion editada' });
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
   }
