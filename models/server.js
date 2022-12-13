@@ -20,6 +20,19 @@ class ServerClass {
       }
     });
     this.io.on("connection", (socket) => {
+      socket.on('busqueda', async (data) => {
+        // si data esta vacio, no hacemos nada
+        if (data === '') {
+          return this.io.emit('busqueda', []);
+        };
+        // Buscamos en la base de datos
+        const [patrocinadores] = await promisePool.query(`SELECT * FROM patrocinadores WHERE nombre LIKE '%${data}%'`);
+        const [artistas] = await promisePool.query(`SELECT * FROM artistas WHERE nombre LIKE '%${data}%'`);
+        const datos = [...patrocinadores, ...artistas]
+        // Emitimos los datos a un unico cliente
+        this.io.to(socket.id).emit('busqueda', datos);
+
+      });
       // Cuando un usuario comenta algo
       socket.on("comentar", (data) => {
         this.io.emit("new-comentario", data);
@@ -29,28 +42,12 @@ class ServerClass {
         this.io.emit("new-evento", data);
       });
       // Chats
-      socket.on('send-message', async (mensaje) => {
-        this.io.sockets.emit(`new-from-${mensaje.emisor}-to-${mensaje.receptor.id}-${mensaje.receptor.rol}`, mensaje.mensaje);
-        
-        await promisePool.query('INSERT INTO mensajes SET ?', [{
-          mensaje: mensaje.mensaje,
-          fecha: new Date(),
-          origen: "envio",
-          emisor: mensaje.emisor,
-          emisor_rol: mensaje.emisor_rol,
-          receptor: mensaje.receptor.id,
-          receptor_rol: mensaje.receptor.rol,
-        }]);
-        
-        await promisePool.query('INSERT INTO mensajes SET ?', [{
-          mensaje: mensaje.mensaje,
-          fecha: new Date(),
-          origen: "recibo",
-          emisor: mensaje.receptor.id,
-          emisor_rol: mensaje.receptor.rol,
-          receptor: mensaje.emisor,
-          receptor_rol: mensaje.emisor_rol,
-        }]);
+      socket.on('new-chat', (data) => {
+        this.io.to(socket.id).emit('new-chat', data);
+        this.io.emit(`new-chat-to-${data.receptor.id}-${data.receptor.rol}`, data);
+      });
+      socket.on('send-message', (mensaje) => {
+        this.io.emit(`new-from-${mensaje.emisor.id}-${mensaje.emisor.rol}-to-${mensaje.receptor.id}-${mensaje.receptor.rol}`, mensaje.mensaje);
       });
     });
   }
@@ -74,6 +71,7 @@ class ServerClass {
     this.app.use('/api/upload', require('../routes/upload.js'));
     this.app.use('/api/cargos', require('../routes/cargos.js'));
     this.app.use('/api/mensajes', require('../routes/mensajes.js'));
+    this.app.use('/api/busquedas', require('../routes/busquedas.js'));
   }
 
   listen() {
