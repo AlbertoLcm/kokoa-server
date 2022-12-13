@@ -132,7 +132,7 @@ routes.post('/reacciones', async(req, res) => {
 });
 
 //  Ruta para editar una reaccion a un negocio
-routes.put('/reacciones', async(req, res) => {
+routes.put('/reacciones/modify', async(req, res) => {
   const { id_negocio, id_usuario, rol_usuario, tipo, valuacion } = req.body;
   if(!id_negocio || !id_usuario, !rol_usuario) {
     return res.status(400).json({ message: 'Faltan datos' });
