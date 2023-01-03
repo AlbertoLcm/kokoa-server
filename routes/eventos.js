@@ -59,8 +59,8 @@ routes.post('/add', async (req, res) => {
     //     <h2> Hay un evento cercano y no estas ahí </h2>
     //     <h3> ${req.body.datosEvento.nombre} </h3>
     //     <p> Ubicado en ${req.body.ubicacion} </p>
-    //     `,
     // });
+    //     `,
 
     return res.status(201).json({ message: 'Evento registrado', insert: insert.insertId });
 
@@ -202,6 +202,41 @@ routes.get('/asistente/check/:id', async (req, res) => {
     return res.status(400).json({ message: 'Algo salio mal', error: error })
   }
 });
+
+// Ruta para mostrar los eventos que asistira un usuario, recibe el id del usuario
+routes.get('/asiste/:id', async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ message: 'Se necesita el id del usuario' })
+  }
+  try {
+    const [eventos] = await promisePool.query('SELECT nombre, fecha_inicio, fecha_termino, direccion, eventos.id_evento FROM eventos JOIN asistentes ON asistentes.id_evento = eventos.id_evento WHERE asistentes.id_usuario = ? AND fecha_termino > DATE_ADD(now(), INTERVAL -6 HOUR)', [id]);
+    if(!eventos.length)  {
+      return res.status(200).json({ message: 'No tiene eventos' })
+    }
+    return res.status(200).json(eventos)
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
+  }
+});
+
+// Ruta para mostrar los eventos que ha creado un USUARIO
+routes.get('/creados/usuario/:id', async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ message: 'Se necesita el id del usuario' })
+  }
+  try {
+    const [eventos] = await promisePool.query('SELECT nombre, fecha_inicio, fecha_termino, direccion, id_evento FROM eventos WHERE anfitrion = ? AND rol_anfitrion = "usuarios" AND fecha_termino > DATE_ADD(now(), INTERVAL -6 HOUR)', [id]);
+    if(!eventos.length)  {
+      return res.status(200).json({ message: 'No tiene eventos' })
+    }
+    return res.status(200).json(eventos)
+  } catch (error) {
+    return res.status(400).json({ message: 'Algo salio mal', error: error })
+  }
+});
+      
 
 // Ruta para mostrar los comentarios de un evento, recibe el id del evento
 routes.get('/comentarios/:id', async (req, res) => {

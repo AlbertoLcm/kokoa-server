@@ -16,12 +16,12 @@ routes.post("/login", async (req, res) => {
     // Paso 2 - Verificamos si el usuario existe
     const [user] = await promisePool.query("SELECT * FROM usuarios WHERE email = ? or telefono = ?", [email.trim(), email.trim()]);
     if (!user.length) {
-      return res.status(400).json({ message: "El usuario no exite" });
+      return res.status(400).json({ message: { email: true, password: false} });
     }
     // Paso 3 - Comprobamos contraseñas
     const buscarPass = await bcrypt.compare(password, user[0].password);
     if (!buscarPass) {
-      return res.status(400).json({ message: "Contraseña incorrecta" });
+      return res.status(400).json({ message: { email: false, password: true} });
     }
     // Paso 4 - Creamos el token
     const token = await jwt.sign({
@@ -38,7 +38,7 @@ routes.post("/login", async (req, res) => {
     });
 
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return res.status(400).json({ message: { email: false, password: false, error: true} });
   };
 });
 // ======= Fin ruta para hacer login a un usuario =======

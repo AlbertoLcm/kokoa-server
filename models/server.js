@@ -23,16 +23,26 @@ class ServerClass {
       socket.on('busqueda', async (data) => {
         // si data esta vacio, no hacemos nada
         if (data === '') {
-          return this.io.emit('busqueda', []);
+          return this.io.to(socket.id).emit('busqueda', []);
         };
         // Buscamos en la base de datos
-        const [patrocinadores] = await promisePool.query(`SELECT * FROM patrocinadores WHERE nombre LIKE '%${data}%'`);
-        const [artistas] = await promisePool.query(`SELECT * FROM artistas WHERE nombre LIKE '%${data}%'`);
+        const [patrocinadores] = await promisePool.query(`SELECT nombre, id, perfil, rol FROM patrocinadores WHERE nombre LIKE '%${data}%'`);
+        const [artistas] = await promisePool.query(`SELECT nombre, id, perfil, rol FROM artistas WHERE nombre LIKE '%${data}%'`);
         const datos = [...patrocinadores, ...artistas]
         // Emitimos los datos a un unico cliente
         this.io.to(socket.id).emit('busqueda', datos);
-
       });
+      socket.on('busqueda-kokoa', async (data) => {
+        // si data esta vacio, no hacemos nada
+        if (data === '') {
+          return this.io.to(socket.id).emit('busqueda-kokoa', { negocios: [], eventos: [] });
+        };
+        // Buscamos en la base de datos
+        const [negocios] = await promisePool.query(`SELECT nombre, id, perfil FROM negocios WHERE nombre LIKE '%${data}%'`);
+        const [eventos] = await promisePool.query(`SELECT nombre, id_evento FROM eventos WHERE nombre LIKE '%${data}%' AND fecha_termino > DATE_ADD(now(), INTERVAL -6 HOUR) AND publico = 1`);
+        // Emitimos los datos a un unico cliente
+        this.io.to(socket.id).emit('busqueda-kokoa', { negocios, eventos });
+      })
       // Cuando un usuario comenta algo
       socket.on("comentar", (data) => {
         this.io.emit("new-comentario", data);
