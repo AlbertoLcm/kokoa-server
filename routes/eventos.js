@@ -6,13 +6,13 @@ const routes = express.Router()
 // ======= Ruta para registrar un evento =======
 routes.post('/add', async (req, res) => {
   const { lat, lng, id } = req.body;
-  const nombre = req.body.datosEvento.nombre;
-  let fechaInicio = req.body.datosEvento.fechaInicio;
-  let horaIncio = req.body.datosEvento.horaInicio;
-  let fechaTermino = req.body.datosEvento.fechaTermino;
-  let horaTermino = req.body.datosEvento.horaTermino;
-  const descripcion = req.body.datosEvento.descripcion;
-  let costo = req.body.datosEvento.costo;
+  const nombre = req.body.evento.nombre;
+  let fechaInicio = req.body.evento.fechaInicio;
+  let horaIncio = req.body.evento.horaInicio;
+  let fechaTermino = req.body.evento.fechaTermino;
+  let horaTermino = req.body.evento.horaTermino;
+  const descripcion = req.body.evento.descripcion;
+  let costo = req.body.evento.costo;
 
   costo ? costo : costo = 0;
 
@@ -27,7 +27,7 @@ routes.post('/add', async (req, res) => {
   try {
 
     const [insert] = await promisePool.query('INSERT INTO eventos SET ?', [{
-      nombre: req.body.datosEvento.nombre,
+      nombre: req.body.evento.nombre,
       direccion: req.body.ubicacion,
       fecha_inicio: fecha_inicio,
       fecha_termino: fecha_termino,
@@ -35,11 +35,11 @@ routes.post('/add', async (req, res) => {
       lng: req.body.lng,
       rol_anfitrion: req.body.rol,
       anfitrion: id,
-      capacidad: req.body.datosEvento.capacidad,
+      capacidad: req.body.evento.capacidad,
       precio: costo,
-      descripcion: req.body.datosEvento.descripcion,
-      tipo: req.body.datosEvento.tipo,
-      publico: req.body.datosEvento.publico,
+      descripcion: req.body.evento.descripcion,
+      tipo: req.body.evento.tipo,
+      publico: req.body.evento.publico,
     }]);
 
     // TODO: Arreglar servidor de correo
@@ -83,16 +83,6 @@ routes.get('/', async (req, res) => {
     return res.status(400).json({ message: 'Algo salio mal', error: error });
   }
 })
-
-// Ruta para mostrar los eventos que estan en curso
-routes.get('/transcurso', async (req, res) => {
-  try {
-    const [eventos] = await promisePool.query('SELECT * FROM eventos WHERE fecha_inicio < DATE_ADD(now(), INTERVAL -6 HOUR) AND fecha_termino > DATE_ADD(now(), INTERVAL -6 HOUR) AND publico = 1');
-    return res.status(200).json(eventos);
-  } catch (error) {
-    return res.status(400).json({ message: 'Algo salio mal', error: error });
-  }
-});
 
 // Ruta para mostrar eventos anteriores de un NEGOCIO, recibe el id del negocio
 routes.get('/anteriores/:id', async (req, res) => {

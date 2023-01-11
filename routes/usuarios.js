@@ -20,13 +20,13 @@ routes.post('/signup', async (req, res) => {
 
   try {
     // Paso 3 - Verificamos si el correo y el telefono existe
-    const [emailBD] = await promisePool.query('SELECT * FROM usuarios WHERE email = ?', [email.trim()]);
+    const [emailBD] = await promisePool.query('SELECT email FROM usuarios WHERE email = ?', [email.trim()]);
     if (emailBD.length) {
       return res.status(400).json({ message: 'El correo ya existe' })
     }
 
     if (telefono) {
-      const [telefonoBD] = await promisePool.query('SELECT * FROM usuarios WHERE telefono = ?', [telefono.trim()]);
+      const [telefonoBD] = await promisePool.query('SELECT telefono FROM usuarios WHERE telefono = ?', [telefono.trim()]);
       if (telefonoBD.length) {
         return res.status(400).json({ message: 'El telefono ya existe' })
       }
@@ -40,7 +40,7 @@ routes.post('/signup', async (req, res) => {
       password: req.body.password
     }]);
     // Paso 5 - Creamos el token con el usuario ingresado
-    const [user] = await promisePool.query("SELECT * FROM usuarios WHERE email = ?", [email]);
+    const [user] = await promisePool.query("SELECT id FROM usuarios WHERE email = ?", [email]);
 
     const token = await jwt.sign({
       id: user[0].id
@@ -60,11 +60,11 @@ routes.post('/signup', async (req, res) => {
 })
 // ======= Fin de la ruta de registrar ======
 
+// Ruta para mostrar un usuario en especifico
 routes.get('/:id', async(req, res) => {
   try {
     const [usuarios] = await promisePool.query('SELECT * FROM usuarios WHERE id = ?', [req.params.id]);
-    res.json(usuarios[0])
-
+    res.status(200).json(usuarios[0])
   } catch (error) {
     return res.status(400).json({ message: 'Algo salio mal', error: error })
   }
@@ -82,7 +82,7 @@ routes.get('/', async(req, res) => {
 routes.put('/:id', async(req, res) => {
   
   // filtro los datos vacios
-  const datosFiltados = Object.keys(req.body).filter(key => req.body[key] === '');
+  const datosFiltados = Object.keys(req.body).filter(variable => req.body[variable] === '');
 
   // elimino los datos vacios
   datosFiltados.forEach(key => delete req.body[key]);
@@ -90,7 +90,6 @@ routes.put('/:id', async(req, res) => {
   try {
     await promisePool.query('UPDATE usuarios SET ? WHERE id = ?', [req.body, req.params.id]);
     res.json({ message: 'Usuario actualizado' })
-    
   } catch (error) {
     res.status(400).json({message: 'Algo salio mal', error: error})
   }
@@ -105,7 +104,7 @@ routes.post('/recuperar', async (req, res) => {
   }
   try {
     // Paso 2 - Verificamos si el correo existe
-    const [usuario] = await promisePool.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+    const [usuario] = await promisePool.query('SELECT email FROM usuarios WHERE email = ?', [email]);
     if (!usuario.length) {
       return res.status(400).json({ message: 'El usuario no existe' })
     }
